@@ -1,8 +1,13 @@
-import { Service } from "@angular/core";
-import localforage from "localforage";
-import { analyzeEmoji } from "./canvas-mean";
-import { EMOJIS, getEmojiFilePath } from "./emoji-index";
-import { RGBColor, OklabKDTree } from "./kd-tree";
+import { HttpClient } from "@angular/common/http";
+import { computed, inject, Service, signal } from "@angular/core";
+import { catchError, map, of } from "rxjs";
+import { OklabKDTree } from "./color-tree/oklab-kd-tree";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { EMOJIS } from "./color-tree/emoji-list";
+import { flattenAlphaOnWhite } from "./color-tree/utils";
+
+export type ImagePart = { row: number; col: number; color: [number, number, number, number] };
+export type EmojiPart = { row: number; col: number; emoji: string };
 
 export type TreeBinary = {
   rootIndex: number;
@@ -11,36 +16,48 @@ export type TreeBinary = {
 
 @Service()
 export class EmojiService {
-  private tree?: OklabKDTree;
+  private readonly loadError = signal<string | null>(null);
+  readonly error = this.loadError.asReadonly();
 
-  async trainKdTree(
-    progressCallback: (progress: number) => void,
-    finish: (result: string) => void,
-  ) {
-    const emojiValues = Object.values(EMOJIS);
-    const emojis: { id: number; color: RGBColor }[] = await Promise.all(
-      emojiValues.map(async (value, index) => {
-        const path = getEmojiFilePath({ fileType: "png", size: 32, name: value });
-        const color = await analyzeEmoji(path);
-        progressCallback(((index + 1) / emojiValues.length) * 100);
-        return {
-          id: index,
-          color: color,
-        };
-      }),
-    );
+  private readonly kdTree = toSignal(
+    inject(HttpClient)
+      .get("/emojiKdTree.bin", { responseType: "arraybuffer" })
+      .pipe(
+        map((buffer) => {
+          if (buffer.byteLength === 0 || buffer.byteLength % (6 * Float64Array.BYTES_PER_ELEMENT)) {
+            throw new Error("Invalid emoji tree binary.");
+          }
+          return OklabKDTree.fromBinary({ rootIndex: 0, buffer });
+        }),
+        catchError(() => {
+          this.loadError.set("Emoji-Farbdaten konnten nicht geladen werden.");
+          return of(null);
+        }),
+      ),
+  );
 
-    const tree = new OklabKDTree(emojis);
-    const treeBinary = tree.exportBinary();
-    var length = treeBinary.buffer.byteLength;
-    await localforage.setItem("emojiKdTree", treeBinary);
-    finish("Kd-tree training complete. Database size: " + (length / 1024).toFixed(2) + " KB.");
-  }
+  readonly ready = computed(() => !!this.kdTree());
 
-  async loadKdTree() {
-    const treeBinary = await localforage.getItem<TreeBinary>("emojiKdTree");
-    if (treeBinary) {
-      this.tree = OklabKDTree.fromBinary(treeBinary);
+  emojify(imageParts: ImagePart[]): EmojiPart[] {
+    const tree = this.kdTree();
+    if (!tree) {
+      throw new Error("KD-Tree not loaded yet.");
     }
+    const resultParts: EmojiPart[] = [];
+    imageParts.forEach((part) => {
+      const [red, green, blue, alpha] = part.color;
+      const treeNode = tree.findNearestColor(
+        flattenAlphaOnWhite({ r: red, g: green, b: blue, a: alpha / 255 }),
+      );
+      if (!treeNode) {
+        throw new Error("No matching emoji found.");
+      }
+      const emoji = EMOJIS[treeNode.id];
+      if (!emoji) {
+        throw new Error("Unknown emoji ID.");
+      }
+      resultParts.push({ row: part.row, col: part.col, emoji });
+    });
+    return resultParts;
   }
 }

@@ -1,0 +1,66 @@
+<h1 class="page-title">Emoji-Mosaik</h1>
+<p class="page-lead">Wähle ein Bild und eine Emoji-Größe, dann entsteht daraus ein Mosaik.</p>
+
+<div class="layout">
+  <aside class="controls" aria-label="Einstellungen">
+    <cr-card heading="Bild">
+      <span crChip crCardMeta>{{ selectedFile() ? "Ausgewählt" : "Kein Bild" }}</span>
+      <app-image-picker (fileSelected)="selectFile($event)" />
+      @if (selectedFile(); as file) {
+        <p class="file-name">{{ file.name }}</p>
+      }
+    </cr-card>
+
+    <cr-card heading="Emoji-Größe">
+      <span crCardMeta class="cr-card__meta">{{ emojiSize() }} px</span>
+      <app-emoji-size-select [size]="emojiSize()" (sizeChange)="changeSize($event)" />
+      <p class="hint">Kleinere Emojis ergeben mehr Details, größere ein gröberes Raster.</p>
+    </cr-card>
+
+    <div class="actions">
+      <button crButton variant="primary" type="button" [disabled]="!canCreate()" (click)="create()">
+        {{ busy() ? "Wird erstellt…" : "Mosaik erstellen" }}
+      </button>
+      <button crButton variant="ghost" type="button" [disabled]="!selectedFile()" (click)="reset()">
+        Zurücksetzen
+      </button>
+    </div>
+    @if (error() || dataError(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    } @else if (!dataReady()) {
+      <p class="hint" role="status">Emoji-Farbdaten werden geladen…</p>
+    }
+  </aside>
+
+  <section class="results" aria-label="Vorschau" [attr.aria-busy]="busy()">
+    <cr-card heading="Original">
+      @if (imageSource(); as source) {
+        <img class="preview" [src]="source" alt="Originalbild" />
+      } @else {
+        <app-image-stage placeholder="Kein Bild ausgewählt" />
+      }
+    </cr-card>
+
+    <cr-card heading="Mosaik">
+      <span crChip crCardMeta>{{ mosaicSource() ? "Fertig" : busy() ? "In Arbeit" : "Leer" }}</span>
+      @if (mosaicSource(); as source) {
+        <img class="preview" [src]="source" alt="Emoji-Mosaik" />
+      } @else {
+        <app-image-stage
+          [placeholder]="busy() ? 'Mosaik wird erstellt…' : 'Hier erscheint dein Mosaik'"
+        />
+      }
+      <div class="result-actions">
+        <button
+          crButton
+          variant="secondary"
+          type="button"
+          [disabled]="!mosaicSource()"
+          (click)="download()"
+        >
+          Herunterladen
+        </button>
+      </div>
+    </cr-card>
+  </section>
+</div>
