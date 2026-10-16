@@ -1,16 +1,16 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 export interface CrLogLine {
   time: string;
   text: string;
-  level?: 'ok' | 'err' | 'hl';
+  level?: "ok" | "err" | "hl";
 }
 
 /** Nutzung: `<cr-log-panel [lines]="zeilen()" />`. Der Text nennt den Zustand als Wort („error", „ok"). */
 @Component({
-  selector: 'cr-log-panel',
+  selector: "cr-log-panel",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: block' },
+  host: { style: "display: block" },
   template: `
     <div class="cr-log" role="log" aria-live="polite">
       @for (line of lines(); track $index) {

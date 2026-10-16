@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 /**
  * Nutzung: `<cr-card heading="Deploy · main"><span crCardMeta class="cr-card__meta">pi-hub</span> … Inhalt …</cr-card>`
  * Ein Element mit dem Attribut `crCardMeta` landet rechts im Kopf.
  */
 @Component({
-  selector: 'cr-card',
+  selector: "cr-card",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: block' },
+  host: { style: "display: block" },
   template: `
     <section class="cr-card">
       <div class="cr-card__header">

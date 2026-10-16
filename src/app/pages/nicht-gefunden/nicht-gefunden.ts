@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { CrButton } from '../../ui';
+import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { RouterLink } from "@angular/router";
+import { CrButton } from "../../ui";
 
 @Component({
-  selector: 'app-nicht-gefunden',
+  selector: "app-nicht-gefunden",
   imports: [RouterLink, CrButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
