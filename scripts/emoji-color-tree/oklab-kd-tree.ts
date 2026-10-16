@@ -27,11 +27,14 @@ export class OklabKDTree {
 
       const axis = depth % 3; // 0=L, 1=a, 2=b
 
-      oklabColors.sort((x, y) => {
+      const sortedRange = oklabColors.slice(start, end + 1).sort((x, y) => {
         if (axis === 0) return x.l - y.l;
         if (axis === 1) return x.a - y.a;
         return x.b - y.b;
       });
+      for (let index = 0; index < sortedRange.length; index += 1) {
+        oklabColors[start + index] = sortedRange[index];
+      }
 
       const median = (start + end) >> 1;
       const nodePtr = allocPtr;
