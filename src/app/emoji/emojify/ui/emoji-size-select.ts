@@ -1,16 +1,21 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model } from "@angular/core";
 
-/** Platzhalter für die Größenwahl der Emojis. Nutzt native Radio-Buttons, noch ohne Anbindung. */
 @Component({
-  selector: 'app-emoji-size-select',
+  selector: "app-emoji-size-select",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { style: 'display: block' },
+  host: { style: "display: block" },
   template: `
     <fieldset class="cr-seg">
       <legend class="visually-hidden">Emoji-Größe</legend>
       @for (size of sizes; track size.id) {
         <label class="cr-seg__option">
-          <input type="radio" name="emoji-size" [value]="size.id" [checked]="size.id === 'm'" />
+          <input
+            type="radio"
+            name="emoji-size"
+            [value]="size.value"
+            [checked]="size.value === this.size()"
+            (change)="this.size.set(size.value)"
+          />
           <span class="cr-seg__label">{{ size.label }}</span>
           <span class="cr-seg__meta">{{ size.meta }}</span>
         </label>
@@ -30,11 +35,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   `,
 })
 export class EmojiSizeSelect {
-  // Platzhalter-Optionen; die echten Größen legt die spätere Logik fest.
+  readonly size = model<number>(16);
   protected readonly sizes = [
-    { id: 's', label: 'Klein', meta: '16 px' },
-    { id: 'm', label: 'Mittel', meta: '32 px' },
-    { id: 'l', label: 'Groß', meta: '48 px' },
-    { id: 'xl', label: 'Sehr groß', meta: '64 px' },
+    { id: "s", value: 16, label: "Klein", meta: "16 px" },
+    { id: "m", value: 32, label: "Mittel", meta: "32 px" },
+    { id: "l", value: 48, label: "Groß", meta: "48 px" },
+    { id: "xl", value: 64, label: "Sehr groß", meta: "64 px" },
   ] as const;
 }

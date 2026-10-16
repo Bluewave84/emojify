@@ -1,0 +1,13 @@
+{
+  "dest": "public/",
+  "mode": {
+    "symbol": {
+      "dest": ".",
+      "sprite": "emoji-sprite.svg"
+    }
+  },
+  "svg": {
+    "xmlDeclaration": false,
+    "doctypeDeclaration": false
+  }
+}

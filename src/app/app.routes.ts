@@ -9,13 +9,8 @@ export const routes: Routes = [
       {
         path: "",
         pathMatch: "full",
-        title: "Emoji-Mosaik · Control Room",
-        loadComponent: () => import("./pages/mosaik/mosaik").then((m) => m.Mosaik),
-      },
-      {
-        path: "setup",
-        title: "Setup and Analysis · Control Room",
-        loadComponent: () => import("./emoji/analyze/emoji-setup").then((m) => m.EmojiSetup),
+        title: "Convert your image · Emojify",
+        loadComponent: () => import("./emoji/emojify/emojify.page").then((m) => m.Emojify),
       },
       {
         path: "**",
