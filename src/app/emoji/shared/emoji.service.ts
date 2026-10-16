@@ -6,13 +6,21 @@ import { toSignal } from "@angular/core/rxjs-interop";
 import { EMOJIS } from "./color-tree/emoji-list";
 import { flattenAlphaOnWhite } from "./color-tree/utils";
 
-export type ImagePart = { row: number; col: number; color: [number, number, number, number] };
-export type EmojiPart = { row: number; col: number; emoji: string };
+export interface ImagePart {
+  row: number;
+  col: number;
+  color: [number, number, number, number];
+}
+export interface EmojiPart {
+  row: number;
+  col: number;
+  emoji: string;
+}
 
-export type TreeBinary = {
+export interface TreeBinary {
   rootIndex: number;
   buffer: ArrayBuffer | SharedArrayBuffer;
-};
+}
 
 @Service()
 export class EmojiService {
