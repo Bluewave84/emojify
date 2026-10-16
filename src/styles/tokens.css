@@ -1,0 +1,97 @@
+/* Control Room — generated from tokens.json (npm run tokens). Nicht von Hand ändern. */
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: #14120f;
+  --panel: #1c1915;
+  --panel-raised: #26221b;
+  --line: #2e2a23;
+  --line-strong: #6b6455;
+  --ink: #ede8df;
+  --ink-muted: #9a9385;
+  --accent: #f4b43a;
+  --accent-hover: #ffc55e;
+  --accent-line: #f4b43a;
+  --accent-text: #f4b43a;
+  --accent-soft: #2a2216;
+  --on-accent: #14120f;
+  --focus: #f4b43a;
+  --success: #6cc58b;
+  --danger: #ef6b5b;
+  --info: #6cb4e8;
+  --shadow-glow: 0 0 24px 0 rgba(244, 180, 58, 0.22);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+  --ground: #f4efe6;
+  --panel: #fbf8f2;
+  --panel-raised: #ffffff;
+  --line: #ddd5c6;
+  --line-strong: #8a8272;
+  --ink: #2b2a26;
+  --ink-muted: #5f5a50;
+  --accent: #f4b43a;
+  --accent-hover: #e5a122;
+  --accent-line: #b57400;
+  --accent-text: #8a5200;
+  --accent-soft: #fbebc4;
+  --on-accent: #14120f;
+  --focus: #8a5200;
+  --success: #2a7048;
+  --danger: #b5382a;
+  --info: #1f6aa5;
+  --shadow-glow: 0 4px 16px 0 rgba(181, 116, 0, 0.18);
+}
+
+:root {
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --type-display-family: var(--font-sans);
+  --type-display-size: 40px;
+  --type-display-line: 44px;
+  --type-display-weight: 600;
+  --type-display-tracking: -0.4px;
+  --type-title-family: var(--font-sans);
+  --type-title-size: 24px;
+  --type-title-line: 30px;
+  --type-title-weight: 600;
+  --type-heading-family: var(--font-sans);
+  --type-heading-size: 18px;
+  --type-heading-line: 24px;
+  --type-heading-weight: 600;
+  --type-body-family: var(--font-sans);
+  --type-body-size: 15px;
+  --type-body-line: 22px;
+  --type-body-weight: 400;
+  --type-small-family: var(--font-sans);
+  --type-small-size: 13px;
+  --type-small-line: 18px;
+  --type-small-weight: 400;
+  --type-value-lg-family: var(--font-mono);
+  --type-value-lg-size: 28px;
+  --type-value-lg-line: 32px;
+  --type-value-lg-weight: 500;
+  --type-value-family: var(--font-mono);
+  --type-value-size: 15px;
+  --type-value-line: 22px;
+  --type-value-weight: 400;
+  --type-label-family: var(--font-mono);
+  --type-label-size: 12px;
+  --type-label-line: 16px;
+  --type-label-weight: 500;
+  --type-label-tracking: 1px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --radius-sm: 8px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-pill: 999px;
+}

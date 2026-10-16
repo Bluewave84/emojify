@@ -1,0 +1,15 @@
+<a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+
+<header class="bar">
+  <div class="bar__inner">
+    <a class="brand" routerLink="/">Control Room</a>
+
+    <button crButton variant="ghost" type="button" (click)="theme.toggle()">
+      {{ theme.theme() === 'dark' ? 'Hell' : 'Dunkel' }}
+    </button>
+  </div>
+</header>
+
+<main id="inhalt" class="main">
+  <router-outlet />
+</main>
