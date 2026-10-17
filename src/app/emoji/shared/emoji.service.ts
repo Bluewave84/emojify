@@ -17,6 +17,16 @@ export interface EmojiPart {
   emoji: string;
 }
 
+export type EmojiSelectionMode = "best" | "random" | "roundRobin";
+
+export interface EmojiSelection {
+  mode: EmojiSelectionMode;
+  /** Number of closest emojis to choose from for "random" and "roundRobin". */
+  topN: number;
+}
+
+export const DEFAULT_SELECTION: EmojiSelection = { mode: "best", topN: 5 };
+
 export interface TreeBinary {
   rootIndex: number;
   buffer: ArrayBuffer | SharedArrayBuffer;
@@ -46,26 +56,36 @@ export class EmojiService {
 
   readonly ready = computed(() => !!this.kdTree());
 
-  emojify(imageParts: ImagePart[]): EmojiPart[] {
+  emojify(
+    imageParts: ImagePart[],
+    selection: EmojiSelection = DEFAULT_SELECTION,
+    random: () => number = Math.random,
+  ): EmojiPart[] {
     const tree = this.kdTree();
     if (!tree) {
       throw new Error("KD-Tree not loaded yet.");
     }
-    const resultParts: EmojiPart[] = [];
-    imageParts.forEach((part) => {
+    const count = selection.mode === "best" ? 1 : Math.max(1, Math.floor(selection.topN) || 1);
+    return imageParts.map((part, index) => {
       const [red, green, blue, alpha] = part.color;
-      const treeNode = tree.findNearestColor(
+      const candidates = tree.findNearestColors(
         flattenAlphaOnWhite({ r: red, g: green, b: blue, a: alpha / 255 }),
+        count,
       );
-      if (!treeNode) {
+      if (candidates.length === 0) {
         throw new Error("No matching emoji found.");
       }
-      const emoji = EMOJIS[treeNode.id];
+      let pick = 0;
+      if (selection.mode === "random") {
+        pick = Math.min(candidates.length - 1, Math.floor(random() * candidates.length));
+      } else if (selection.mode === "roundRobin") {
+        pick = index % candidates.length;
+      }
+      const emoji = EMOJIS[candidates[pick].id];
       if (!emoji) {
         throw new Error("Unknown emoji ID.");
       }
-      resultParts.push({ row: part.row, col: part.col, emoji });
+      return { row: part.row, col: part.col, emoji };
     });
-    return resultParts;
   }
 }

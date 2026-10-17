@@ -13,7 +13,12 @@ import { CrButton, CrCard, CrChip } from "../../ui";
 import { EmojiSizeSelect } from "./ui/emoji-size-select";
 import { ImagePicker } from "./ui/image-picker";
 import { ImageStage } from "./ui/image-stage";
-import { EmojiService } from "../shared/emoji.service";
+import {
+  DEFAULT_SELECTION,
+  EmojiSelection,
+  EmojiSelectionMode,
+  EmojiService,
+} from "../shared/emoji.service";
 import {
   analyzeImageParts,
   createEmojiImage,
@@ -46,6 +51,12 @@ export class Emojify {
     { key: "brightness", label: "Helligkeit" },
     { key: "contrast", label: "Kontrast" },
     { key: "saturation", label: "Sättigung" },
+  ] as const;
+  readonly selection = signal<EmojiSelection>({ ...DEFAULT_SELECTION });
+  readonly selectionModes = [
+    { value: "best", label: "Beste", meta: "Top 1" },
+    { value: "random", label: "Zufall", meta: "Top N" },
+    { value: "roundRobin", label: "Reihum", meta: "Top N" },
   ] as const;
   readonly imageSource = signal<string | null>(null);
   readonly mosaicSource = signal<string | null>(null);
@@ -92,6 +103,25 @@ export class Emojify {
     this.error.set(null);
   }
 
+  changeSelectionMode(mode: EmojiSelectionMode) {
+    this.invalidateMosaic();
+    this.selection.update((s) => ({ ...s, mode }));
+  }
+
+  changeTopN(event: Event) {
+    const topN = Number((event.target as HTMLInputElement).value);
+    this.invalidateMosaic();
+    this.selection.update((s) => ({ ...s, topN }));
+  }
+
+  private invalidateMosaic() {
+    this.operation++;
+    this.controller?.abort();
+    this.mosaicSource.set(null);
+    this.busy.set(false);
+    this.error.set(null);
+  }
+
   resetAdjustments() {
     this.operation++;
     this.controller?.abort();
@@ -124,7 +154,7 @@ export class Emojify {
       if (operation !== this.operation) return;
       const result = await createEmojiImage(
         this.doc,
-        this.emojiService.emojify(parts),
+        this.emojiService.emojify(parts, this.selection()),
         size,
         sprite,
         controller.signal,

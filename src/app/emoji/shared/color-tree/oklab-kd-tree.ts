@@ -117,6 +117,62 @@ export class OklabKDTree {
     };
   }
 
+  /**
+   * Finds up to `count` perceptually closest colors, ordered from closest to farthest.
+   */
+  findNearestColors(
+    targetRgb: RGBColor,
+    count: number,
+  ): { id: number; squaredOklabDistance: number }[] {
+    if (this.rootIndex === -1 || count < 1) return [];
+
+    const target = rgbToOklab(targetRgb);
+    // Sorted ascending by distance, capped at `count` entries
+    const best: { nodePtr: number; distSq: number }[] = [];
+    const worstDistSq = () => (best.length < count ? Infinity : best[best.length - 1].distSq);
+
+    const search = (nodePtr: number, depth: number) => {
+      if (nodePtr === -1) return;
+
+      const axis = depth % 3;
+      const nl = this.treeData[nodePtr + OklabKDTree.L];
+      const na = this.treeData[nodePtr + OklabKDTree.A];
+      const nb = this.treeData[nodePtr + OklabKDTree.B];
+
+      const dl = target.l - nl;
+      const da = target.a - na;
+      const db = target.b - nb;
+      const distSq = dl * dl + da * da + db * db;
+
+      if (distSq < worstDistSq()) {
+        let index = best.length;
+        while (index > 0 && best[index - 1].distSq > distSq) index--;
+        best.splice(index, 0, { nodePtr, distSq });
+        if (best.length > count) best.pop();
+      }
+
+      let axisDiff = target.l - nl;
+      if (axis === 1) axisDiff = target.a - na;
+      else if (axis === 2) axisDiff = target.b - nb;
+
+      const leftPtr = this.treeData[nodePtr + OklabKDTree.LEFT];
+      const rightPtr = this.treeData[nodePtr + OklabKDTree.RIGHT];
+
+      search(axisDiff < 0 ? leftPtr : rightPtr, depth + 1);
+
+      if (axisDiff * axisDiff < worstDistSq()) {
+        search(axisDiff < 0 ? rightPtr : leftPtr, depth + 1);
+      }
+    };
+
+    search(this.rootIndex, 0);
+
+    return best.map(({ nodePtr, distSq }) => ({
+      id: this.treeData[nodePtr + OklabKDTree.ID],
+      squaredOklabDistance: distSq,
+    }));
+  }
+
   exportBinary(): { rootIndex: number; buffer: ArrayBuffer | SharedArrayBuffer } {
     // Wir kopieren den Buffer, um Seiteneffekte zu vermeiden
     return {
