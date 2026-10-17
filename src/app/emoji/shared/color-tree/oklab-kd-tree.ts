@@ -4,7 +4,7 @@ import { rgbToOklab } from "./utils";
 export class OklabKDTree {
   // Flat layout: [L, a, b, id, leftChildIndex, rightChildIndex]
   private treeData!: Float64Array;
-  private rootIndex: number = -1;
+  private rootIndex = -1;
   private readonly STRIDE = 6;
 
   private static readonly L = 0;

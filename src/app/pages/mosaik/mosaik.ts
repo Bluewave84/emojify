@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CrButton, CrCard, CrChip } from '../../ui';
+import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { CrButton, CrCard, CrChip } from "../../ui";
 import { EmojiSizeSelect } from "../../emoji/emojify/ui/emoji-size-select";
 import { ImagePicker } from "../../emoji/emojify/ui/image-picker";
 import { ImageStage } from "../../emoji/emojify/ui/image-stage";

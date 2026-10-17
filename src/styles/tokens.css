@@ -1,7 +1,7 @@
 /* Control Room — generated from tokens.json (npm run tokens). Nicht von Hand ändern. */
 
 :root,
-[data-theme='dark'] {
+[data-theme="dark"] {
   color-scheme: dark;
   --ground: #14120f;
   --panel: #1c1915;
@@ -23,7 +23,7 @@
   --shadow-glow: 0 0 24px 0 rgba(244, 180, 58, 0.22);
 }
 
-[data-theme='light'] {
+[data-theme="light"] {
   color-scheme: light;
   --ground: #f4efe6;
   --panel: #fbf8f2;
@@ -46,8 +46,8 @@
 }
 
 :root {
-  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --type-display-family: var(--font-sans);
   --type-display-size: 40px;
   --type-display-line: 44px;
