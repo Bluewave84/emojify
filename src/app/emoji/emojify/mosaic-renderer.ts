@@ -1,6 +1,36 @@
 import { FastAverageColor } from "fast-average-color";
 import type { EmojiPart, ImagePart } from "../shared/emoji.service";
 
+export interface ImageAdjustments {
+  brightness: number;
+  contrast: number;
+  saturation: number;
+}
+
+export const DEFAULT_ADJUSTMENTS: ImageAdjustments = {
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+};
+
+const clamp = (value: number) => Math.min(255, Math.max(0, value));
+
+/** Applies brightness/contrast/saturation (percent, 100 = unchanged) like the CSS filters. */
+export function adjustColor(
+  value: readonly number[],
+  { brightness, contrast, saturation }: ImageAdjustments,
+): [number, number, number, number] {
+  const b = brightness / 100;
+  const c = contrast / 100;
+  const s = saturation / 100;
+  const [r, g, bl] = value.map((channel) => clamp(channel * b));
+  const gray = 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  const out = [r, g, bl].map((channel) =>
+    clamp((clamp(gray + (channel - gray) * s) - 127.5) * c + 127.5),
+  );
+  return [out[0], out[1], out[2], value[3] ?? 255];
+}
+
 async function loadImage(
   doc: Document,
   source: string,
@@ -33,6 +63,7 @@ export async function analyzeImageParts(
   imageSource: string,
   emojiSize: number,
   signal?: AbortSignal,
+  adjustments: ImageAdjustments = DEFAULT_ADJUSTMENTS,
 ): Promise<ImagePart[]> {
   const image = await loadImage(doc, imageSource, signal);
   if (!Number.isInteger(emojiSize) || emojiSize <= 0) {
@@ -72,7 +103,7 @@ export async function analyzeImageParts(
         );
         const color = averageColor.getColor(canvas, { algorithm: "sqrt" });
         if (color.error) throw color.error;
-        parts.push({ row, col, color: color.value });
+        parts.push({ row, col, color: adjustColor(color.value, adjustments) });
       }
       if (row % 16 === 0) {
         await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));

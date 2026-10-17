@@ -14,7 +14,12 @@ import { EmojiSizeSelect } from "./ui/emoji-size-select";
 import { ImagePicker } from "./ui/image-picker";
 import { ImageStage } from "./ui/image-stage";
 import { EmojiService } from "../shared/emoji.service";
-import { analyzeImageParts, createEmojiImage } from "./mosaic-renderer";
+import {
+  analyzeImageParts,
+  createEmojiImage,
+  DEFAULT_ADJUSTMENTS,
+  ImageAdjustments,
+} from "./mosaic-renderer";
 
 @Component({
   selector: "app-emojify",
@@ -32,6 +37,16 @@ export class Emojify {
 
   readonly selectedFile = signal<File | null>(null);
   readonly emojiSize = signal(16);
+  readonly adjustments = signal<ImageAdjustments>({ ...DEFAULT_ADJUSTMENTS });
+  readonly previewFilter = computed(() => {
+    const a = this.adjustments();
+    return `brightness(${a.brightness}%) contrast(${a.contrast}%) saturate(${a.saturation}%)`;
+  });
+  readonly adjustmentFields = [
+    { key: "brightness", label: "Helligkeit" },
+    { key: "contrast", label: "Kontrast" },
+    { key: "saturation", label: "Sättigung" },
+  ] as const;
   readonly imageSource = signal<string | null>(null);
   readonly mosaicSource = signal<string | null>(null);
   readonly busy = signal(false);
@@ -67,6 +82,25 @@ export class Emojify {
     this.error.set(null);
   }
 
+  changeAdjustment(key: keyof ImageAdjustments, event: Event) {
+    const value = Number((event.target as HTMLInputElement).value);
+    this.operation++;
+    this.controller?.abort();
+    this.adjustments.update((a) => ({ ...a, [key]: value }));
+    this.mosaicSource.set(null);
+    this.busy.set(false);
+    this.error.set(null);
+  }
+
+  resetAdjustments() {
+    this.operation++;
+    this.controller?.abort();
+    this.adjustments.set({ ...DEFAULT_ADJUSTMENTS });
+    this.mosaicSource.set(null);
+    this.busy.set(false);
+    this.error.set(null);
+  }
+
   async create() {
     const source = this.imageSource();
     if (!source || !this.canCreate()) return;
@@ -80,7 +114,7 @@ export class Emojify {
 
     try {
       const [parts, sprite] = await Promise.all([
-        analyzeImageParts(this.doc, source, size, controller.signal),
+        analyzeImageParts(this.doc, source, size, controller.signal, this.adjustments()),
         firstValueFrom(
           this.http
             .get("/emoji-sprite.svg", { responseType: "text" })
@@ -123,6 +157,7 @@ export class Emojify {
     const source = this.imageSource();
     if (source) URL.revokeObjectURL(source);
     this.selectedFile.set(null);
+    this.adjustments.set({ ...DEFAULT_ADJUSTMENTS });
     this.imageSource.set(null);
     this.mosaicSource.set(null);
     this.busy.set(false);

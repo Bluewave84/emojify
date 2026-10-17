@@ -17,6 +17,32 @@
       <p class="hint">Kleinere Emojis ergeben mehr Details, größere ein gröberes Raster.</p>
     </cr-card>
 
+    <cr-card heading="Bildanpassung">
+      @for (field of adjustmentFields; track field.key) {
+        <label class="adjust">
+          <span>{{ field.label }}: {{ adjustments()[field.key] }} %</span>
+          <input
+            type="range"
+            min="0"
+            max="200"
+            step="5"
+            [value]="adjustments()[field.key]"
+            [disabled]="!imageSource()"
+            (input)="changeAdjustment(field.key, $event)"
+          />
+        </label>
+      }
+      <button
+        crButton
+        variant="ghost"
+        type="button"
+        [disabled]="!imageSource()"
+        (click)="resetAdjustments()"
+      >
+        Anpassungen zurücksetzen
+      </button>
+    </cr-card>
+
     <div class="actions">
       <button crButton variant="primary" type="button" [disabled]="!canCreate()" (click)="create()">
         {{ busy() ? "Wird erstellt…" : "Mosaik erstellen" }}
@@ -35,7 +61,7 @@
   <section class="results" aria-label="Vorschau" [attr.aria-busy]="busy()">
     <cr-card heading="Original">
       @if (imageSource(); as source) {
-        <img class="preview" [src]="source" alt="Originalbild" />
+        <img class="preview" [src]="source" [style.filter]="previewFilter()" alt="Originalbild" />
       } @else {
         <app-image-stage placeholder="Kein Bild ausgewählt" />
       }
