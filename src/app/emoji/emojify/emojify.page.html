@@ -17,6 +17,42 @@
       <p class="hint">Kleinere Emojis ergeben mehr Details, größere ein gröberes Raster.</p>
     </cr-card>
 
+    <cr-card heading="Emoji-Auswahl">
+      <fieldset class="cr-seg">
+        <legend class="visually-hidden">Emoji-Auswahl</legend>
+        @for (mode of selectionModes; track mode.value) {
+          <label class="cr-seg__option">
+            <input
+              type="radio"
+              name="emoji-selection"
+              [value]="mode.value"
+              [checked]="mode.value === selection().mode"
+              (change)="changeSelectionMode(mode.value)"
+            />
+            <span class="cr-seg__label">{{ mode.label }}</span>
+            <span class="cr-seg__meta">{{ mode.meta }}</span>
+          </label>
+        }
+      </fieldset>
+      @if (selection().mode !== "best") {
+        <label class="adjust">
+          <span>Top N: {{ selection().topN }} nächste Emojis</span>
+          <input
+            type="range"
+            min="2"
+            max="20"
+            step="1"
+            [value]="selection().topN"
+            (input)="changeTopN($event)"
+          />
+        </label>
+      }
+      <p class="hint">
+        Zufall und Reihum wählen aus den N farblich ähnlichsten Emojis und sorgen für mehr
+        Abwechslung.
+      </p>
+    </cr-card>
+
     <cr-card heading="Bildanpassung">
       @for (field of adjustmentFields; track field.key) {
         <label class="adjust">

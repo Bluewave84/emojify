@@ -42,4 +42,37 @@ describe("EmojiService", () => {
     expect(service.ready()).toBe(false);
     expect(service.error()).toBeTruthy();
   });
+
+  describe("emoji selection", () => {
+    const black = { row: 0, col: 0, color: [0, 0, 0, 255] as [number, number, number, number] };
+    const tiles = [0, 1, 2, 3].map((col) => ({ ...black, col }));
+
+    beforeEach(() => {
+      // Three nodes: black (id 0, root), dark gray (id 1), white (id 2)
+      http
+        .expectOne("/emojiKdTree.bin")
+        .flush(
+          new Float64Array([0.2, 0, 0, 1, 6, 12, 0, 0, 0, 0, -1, -1, 1, 0, 0, 2, -1, -1]).buffer,
+        );
+    });
+
+    it("picks the closest emoji by default", () => {
+      expect(service.emojify(tiles).map((p) => p.emoji)).toEqual(Array(4).fill(EMOJIS[0]));
+    });
+
+    it("cycles through the top N emojis in round robin mode", () => {
+      expect(service.emojify(tiles, { mode: "roundRobin", topN: 2 }).map((p) => p.emoji)).toEqual([
+        EMOJIS[0],
+        EMOJIS[1],
+        EMOJIS[0],
+        EMOJIS[1],
+      ]);
+    });
+
+    it("picks randomly among the top N emojis", () => {
+      const rolls = [0.99, 0, 0.5, 0.4];
+      const result = service.emojify(tiles, { mode: "random", topN: 3 }, () => rolls.shift()!);
+      expect(result.map((p) => p.emoji)).toEqual([EMOJIS[2], EMOJIS[0], EMOJIS[1], EMOJIS[1]]);
+    });
+  });
 });
