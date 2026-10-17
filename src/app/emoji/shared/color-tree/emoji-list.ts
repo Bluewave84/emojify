@@ -1,4 +1,4 @@
-const EMOJI_LIST = [
+export const EMOJI_LIST = [
   "1f0cf",
   "1f1e6",
   "1f1e7",
@@ -3751,12 +3751,7 @@ const EMOJI_LIST = [
   "00ae",
 ] as const;
 
-export const EMOJIS = EMOJI_LIST.reduce(
-  (acc, name, index) => {
-    acc = { ...acc, [index]: name };
-    return acc;
-  },
-  {} as Record<number, EmojiName>,
-);
+// Index in this list is the emoji id stored in the KD-tree binary.
+export const EMOJIS: Record<number, EmojiName> = { ...EMOJI_LIST };
 
 export type EmojiName = (typeof EMOJI_LIST)[number];

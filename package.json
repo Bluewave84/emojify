@@ -12,7 +12,8 @@
     "build-sprite": "svg-sprite -c svg-sprite.config.json svg/*.svg",
     "lint": "ng lint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit"
   },
   "private": true,
   "packageManager": "npm@10.9.4",
