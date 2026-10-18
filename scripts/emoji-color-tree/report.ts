@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import type { RGBColor } from "../../src/app/emoji/shared/color-tree/types";
 import type { GenerateResult, TreeEmoji } from "./generate";
 
@@ -62,8 +61,13 @@ export const writeReport = async (result: GenerateResult, reportDir: string) => 
 };
 
 const renderHtml = (result: GenerateResult) => {
-  const imageBase = pathToFileURL(result.pngDir + path.sep).href;
-  const img = (file: string) => `<img src="${imageBase}${file}" width="32" height="32" alt="">`;
+  const glyph = (name: string) =>
+    name
+      .split("_")
+      .map((codePoint) => String.fromCodePoint(Number.parseInt(codePoint, 16)))
+      .join("");
+  const renderEmoji = (name: string) =>
+    `<span class="noto-color-emoji-regular">${glyph(name)}</span>`;
 
   const byHue = [...result.emojis].sort((x, y) => hue(x) - hue(y) || x.oklab.l - y.oklab.l);
   const twins = result.emojis
@@ -84,12 +88,12 @@ const renderHtml = (result: GenerateResult) => {
       .filter(Boolean)
       .join("\n");
     const cls = emoji.shadowedBy ? "tile shadowed" : "tile";
-    return `<div class="${cls}" title="${escape(title)}">${img(emoji.file)}<span style="background:${hex}"></span></div>`;
+    return `<div class="${cls}" title="${escape(title)}">${renderEmoji(emoji.name)}<span class="swatch" style="background:${hex}"></span></div>`;
   };
 
-  const pair = (emoji: TreeEmoji) => {
-    const other = byId.get(emoji.nearest!.id)!;
-    return `<tr><td>${img(emoji.file)} ${emoji.name}</td><td>${img(other.file)} ${other.name}</td><td>${emoji.nearest!.distance.toFixed(4)}</td><td>${emoji.shadowedBy ? "yes" : ""}</td></tr>`;
+  const pair = (item: TreeEmoji) => {
+    const other = byId.get(item.nearest!.id)!;
+    return `<tr><td>${renderEmoji(item.name)} ${item.name}</td><td>${renderEmoji(other.name)} ${other.name}</td><td>${item.nearest!.distance.toFixed(4)}</td><td>${item.shadowedBy ? "yes" : ""}</td></tr>`;
   };
 
   const list = (title: string, names: string[]) =>
@@ -103,6 +107,9 @@ const renderHtml = (result: GenerateResult) => {
 <head>
 <meta charset="utf-8">
 <title>Emoji color tree report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet" />
 <style>
   :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
   body { margin: 24px; }
@@ -110,12 +117,17 @@ const renderHtml = (result: GenerateResult) => {
   .stats div { border: 1px solid #8884; border-radius: 8px; padding: 8px 12px; }
   .stats b { display: block; font-size: 1.4em; }
   .grid { display: flex; flex-wrap: wrap; gap: 2px; }
-  .tile { display: flex; flex-direction: column; width: 32px; }
-  .tile span { height: 8px; }
+  .tile { display: flex; flex-direction: column; width: 32px; font-size: 28px; line-height: 32px; }
+  .tile .swatch { height: 8px; }
   .tile.shadowed { outline: 2px solid crimson; }
   table { border-collapse: collapse; }
   td, th { padding: 2px 8px; text-align: left; vertical-align: middle; }
-  td img { vertical-align: middle; }
+  .noto-color-emoji-regular {
+    font-family: "Noto Color Emoji", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    vertical-align: middle;
+  }
   .mono { font-family: ui-monospace, monospace; font-size: 0.85em; word-break: break-all; }
 </style>
 </head>

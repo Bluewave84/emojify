@@ -8,5 +8,5 @@
     "allowJs": true,
     "types": ["node"]
   },
-  "include": ["scripts/**/*.*ts"]
+  "include": ["scripts/**/*.*ts", "tmp/**/*.ts"]
 }

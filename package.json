@@ -13,7 +13,8 @@
     "lint": "ng lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit"
+    "typecheck:scripts": "tsc -p tsconfig.scripts.json --noEmit",
+    "csv-report": "tsx --tsconfig tsconfig.scripts.json tmp/emoji-color-tree/report.ts"
   },
   "private": true,
   "packageManager": "npm@10.9.4",
@@ -36,6 +37,7 @@
     "@lunapaint/png-codec": "^0.2.0",
     "@types/node": "^24.19.2",
     "angular-eslint": "22.6.0",
+    "csv-writer": "^1.6.0",
     "eslint": "^10.12.0",
     "jsdom": "^30.1.3",
     "pngjs": "^7.0.0",
