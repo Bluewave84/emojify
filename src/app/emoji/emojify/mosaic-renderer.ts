@@ -151,8 +151,8 @@ export async function createEmojiImage(
   canvas.height = rows * emojiSize;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Failed to get 2D context.");
-  context.fillStyle = "#ffffff";
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  //context.fillStyle = "#ffffff";
+  //context.fillRect(0, 0, canvas.width, canvas.height);
 
   const images = new Map<string, HTMLImageElement>();
   try {

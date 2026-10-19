@@ -2,7 +2,9 @@
 
 <header class="bar">
   <div class="bar__inner">
-    <a class="brand" routerLink="/">Control Room</a>
+    <a class="brand" routerLink="/">Emojify</a>
+
+    <a routerLink="/analysis">Analysis</a>
 
     <button crButton variant="ghost" type="button" (click)="theme.toggle()">
       {{ theme.theme() === "dark" ? "Hell" : "Dunkel" }}
