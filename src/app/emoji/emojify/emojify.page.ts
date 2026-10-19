@@ -42,6 +42,8 @@ export class Emojify {
 
   readonly selectedFile = signal<File | null>(null);
   readonly emojiSize = signal(16);
+  readonly transparentBackground = signal(false);
+  readonly backgroundColor = signal("#000000");
   readonly adjustments = signal<ImageAdjustments>({ ...DEFAULT_ADJUSTMENTS });
   readonly previewFilter = computed(() => {
     const a = this.adjustments();
@@ -114,6 +116,16 @@ export class Emojify {
     this.selection.update((s) => ({ ...s, topN }));
   }
 
+  changeTransparentBackground(event: Event) {
+    this.invalidateMosaic();
+    this.transparentBackground.set((event.target as HTMLInputElement).checked);
+  }
+
+  changeBackgroundColor(event: Event) {
+    this.invalidateMosaic();
+    this.backgroundColor.set((event.target as HTMLInputElement).value);
+  }
+
   private invalidateMosaic() {
     this.operation++;
     this.controller?.abort();
@@ -158,6 +170,7 @@ export class Emojify {
         size,
         sprite,
         controller.signal,
+        this.transparentBackground() ? null : this.backgroundColor(),
       );
       if (operation === this.operation) this.mosaicSource.set(result);
     } catch {

@@ -17,6 +17,27 @@
       <p class="hint">Kleinere Emojis ergeben mehr Details, größere ein gröberes Raster.</p>
     </cr-card>
 
+    <cr-card heading="Hintergrund">
+      <label class="background-toggle">
+        <input
+          type="checkbox"
+          [checked]="transparentBackground()"
+          (change)="changeTransparentBackground($event)"
+        />
+        <span>Transparenter Hintergrund</span>
+      </label>
+      @if (!transparentBackground()) {
+        <label class="background-color">
+          <span>Hintergrundfarbe</span>
+          <input
+            type="color"
+            [value]="backgroundColor()"
+            (input)="changeBackgroundColor($event)"
+          />
+        </label>
+      }
+    </cr-card>
+
     <cr-card heading="Emoji-Auswahl">
       <fieldset class="cr-seg">
         <legend class="visually-hidden">Emoji-Auswahl</legend>

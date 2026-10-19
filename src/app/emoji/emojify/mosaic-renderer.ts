@@ -133,6 +133,7 @@ export async function createEmojiImage(
   emojiSize: number,
   spriteText: string,
   signal?: AbortSignal,
+  backgroundColor: string | null = "#000000",
 ): Promise<string> {
   signal?.throwIfAborted();
   if (parts.length === 0) throw new Error("Cannot render an empty mosaic.");
@@ -151,8 +152,10 @@ export async function createEmojiImage(
   canvas.height = rows * emojiSize;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Failed to get 2D context.");
-  //context.fillStyle = "#ffffff";
-  //context.fillRect(0, 0, canvas.width, canvas.height);
+  if (backgroundColor !== null) {
+    context.fillStyle = backgroundColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+  }
 
   const images = new Map<string, HTMLImageElement>();
   try {
