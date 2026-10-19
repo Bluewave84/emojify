@@ -69,6 +69,31 @@ describe("Emojify workflow", () => {
     expect(page.canCreate()).toBe(false);
   });
 
+  it("defaults to a black background and supports transparency or a custom color", async () => {
+    const fixture = TestBed.createComponent(Emojify);
+    const page = fixture.componentInstance;
+    await fixture.whenStable();
+
+    expect(page.transparentBackground()).toBe(false);
+    expect(page.backgroundColor()).toBe("#000000");
+    expect(fixture.nativeElement.querySelector('input[type="color"]').value).toBe("#000000");
+
+    const transparent = fixture.nativeElement.querySelector(
+      'input[type="checkbox"]',
+    ) as HTMLInputElement;
+    transparent.click();
+    expect(page.transparentBackground()).toBe(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('input[type="color"]')).toBeNull();
+
+    transparent.click();
+    fixture.detectChanges();
+    const color = fixture.nativeElement.querySelector('input[type="color"]') as HTMLInputElement;
+    color.value = "#123456";
+    color.dispatchEvent(new Event("input"));
+    expect(page.backgroundColor()).toBe("#123456");
+  });
+
   it("does not publish a result after reset during creation", async () => {
     const page = TestBed.createComponent(Emojify).componentInstance;
     page.selectFile(file);
