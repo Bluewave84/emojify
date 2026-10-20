@@ -1,3 +1,4 @@
+import { provideTaiga } from "@taiga-ui/core";
 import { ApplicationConfig, inject, provideBrowserGlobalErrorListeners } from "@angular/core";
 import {
   provideRouter,
@@ -25,5 +26,6 @@ export const appConfig: ApplicationConfig = {
       }),
     ),
     provideHttpClient(),
+    provideTaiga(),
   ],
 };

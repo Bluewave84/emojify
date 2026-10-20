@@ -52,7 +52,7 @@ describe("Emojify workflow", () => {
     page.selectFile(file);
     await fixture.whenStable();
 
-    expect(fixture.nativeElement.querySelector('img[alt="Originalbild"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('img[alt="Original image"]')).toBeTruthy();
     expect(page.canCreate()).toBe(true);
     expect(page.busy()).toBe(false);
     page.reset();
@@ -117,11 +117,33 @@ describe("Emojify workflow", () => {
     expect(page.mosaicSource()).toBeNull();
   });
 
-  it("updates the numeric tile size from the selected radio", async () => {
+  it("updates the tile size from the fixed Taiga slider stops", async () => {
     const fixture = TestBed.createComponent(EmojiSizeSelect);
     await fixture.whenStable();
-    const radio = fixture.nativeElement.querySelector('input[value="48"]') as HTMLInputElement;
-    radio.click();
+    const slider = fixture.nativeElement.querySelector(
+      'input[type="range"]',
+    ) as HTMLInputElement | null;
+
+    expect(slider).not.toBeNull();
+    if (!slider) return;
+
+    expect(slider.min).toBe("16");
+    expect(slider.max).toBe("64");
+    expect(slider.step).toBe("16");
+    slider.value = "48";
+    slider.dispatchEvent(new Event("input"));
+    await fixture.whenStable();
+
     expect(fixture.componentInstance.size()).toBe(48);
+  });
+
+  it("updates the selection mode from the chosen Taiga radio", async () => {
+    const fixture = TestBed.createComponent(Emojify);
+    await fixture.whenStable();
+    const radios = fixture.nativeElement.querySelectorAll('input[type="radio"]');
+
+    radios[1].click();
+
+    expect(fixture.componentInstance.selection().mode).toBe("random");
   });
 });

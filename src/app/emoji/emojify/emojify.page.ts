@@ -1,4 +1,5 @@
 import { HttpClient } from "@angular/common/http";
+import { FormsModule } from "@angular/forms";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,8 +9,10 @@ import {
   inject,
   signal,
 } from "@angular/core";
+import { TuiButton, TuiCheckbox, TuiExpand, TuiRadio, TuiSlider } from "@taiga-ui/core";
+import { TuiAccordion } from "@taiga-ui/kit";
 import { firstValueFrom, fromEvent, takeUntil } from "rxjs";
-import { CrButton, CrCard, CrChip } from "../../ui";
+import { CrCard } from "../../ui";
 import { EmojiSizeSelect } from "./ui/emoji-size-select";
 import { ImagePicker } from "./ui/image-picker";
 import { ImageStage } from "./ui/image-stage";
@@ -28,7 +31,19 @@ import {
 
 @Component({
   selector: "app-emojify",
-  imports: [CrButton, CrCard, CrChip, EmojiSizeSelect, ImagePicker, ImageStage],
+  imports: [
+    FormsModule,
+    TuiAccordion,
+    TuiButton,
+    TuiCheckbox,
+    TuiExpand,
+    TuiRadio,
+    TuiSlider,
+    CrCard,
+    EmojiSizeSelect,
+    ImagePicker,
+    ImageStage,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./emojify.page.html",
   styleUrl: "./emojify.page.css",
@@ -50,15 +65,15 @@ export class Emojify {
     return `brightness(${a.brightness}%) contrast(${a.contrast}%) saturate(${a.saturation}%)`;
   });
   readonly adjustmentFields = [
-    { key: "brightness", label: "Helligkeit" },
-    { key: "contrast", label: "Kontrast" },
-    { key: "saturation", label: "Sättigung" },
+    { key: "brightness", label: "Brightness" },
+    { key: "contrast", label: "Contrast" },
+    { key: "saturation", label: "Saturation" },
   ] as const;
   readonly selection = signal<EmojiSelection>({ ...DEFAULT_SELECTION });
   readonly selectionModes = [
-    { value: "best", label: "Beste", meta: "Top 1" },
-    { value: "random", label: "Zufall", meta: "Top N" },
-    { value: "roundRobin", label: "Reihum", meta: "Top N" },
+    { value: "best", label: "Best", meta: "Top 1" },
+    { value: "random", label: "Random", meta: "Top N" },
+    { value: "roundRobin", label: "Round robin", meta: "Top N" },
   ] as const;
   readonly imageSource = signal<string | null>(null);
   readonly mosaicSource = signal<string | null>(null);
@@ -75,11 +90,11 @@ export class Emojify {
   selectFile(file: File) {
     this.reset();
     if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
-      this.error.set("Bitte eine PNG-, JPG- oder WebP-Datei auswählen.");
+      this.error.set("Please select a PNG, JPG, or WebP file.");
       return;
     }
     if (file.size > 20 * 1024 * 1024) {
-      this.error.set("Die Datei darf maximal 20 MB groß sein.");
+      this.error.set("The file must not exceed 20 MB.");
       return;
     }
     this.selectedFile.set(file);
@@ -95,8 +110,7 @@ export class Emojify {
     this.error.set(null);
   }
 
-  changeAdjustment(key: keyof ImageAdjustments, event: Event) {
-    const value = Number((event.target as HTMLInputElement).value);
+  changeAdjustment(key: keyof ImageAdjustments, value: number) {
     this.operation++;
     this.controller?.abort();
     this.adjustments.update((a) => ({ ...a, [key]: value }));
@@ -110,15 +124,14 @@ export class Emojify {
     this.selection.update((s) => ({ ...s, mode }));
   }
 
-  changeTopN(event: Event) {
-    const topN = Number((event.target as HTMLInputElement).value);
+  changeTopN(topN: number) {
     this.invalidateMosaic();
     this.selection.update((s) => ({ ...s, topN }));
   }
 
-  changeTransparentBackground(event: Event) {
+  changeTransparentBackground(transparent: boolean) {
     this.invalidateMosaic();
-    this.transparentBackground.set((event.target as HTMLInputElement).checked);
+    this.transparentBackground.set(transparent);
   }
 
   changeBackgroundColor(event: Event) {
@@ -176,7 +189,7 @@ export class Emojify {
     } catch {
       if (operation === this.operation) {
         this.error.set(
-          "Mosaik konnte nicht erstellt werden. Bitte ein gültiges Bild bis 16 Megapixel auswählen und erneut versuchen.",
+          "Could not create the mosaic. Please select a valid image up to 16 megapixels and try again.",
         );
       }
     } finally {
@@ -190,7 +203,7 @@ export class Emojify {
     if (!source) return;
     const link = this.doc.createElement("a");
     link.href = source;
-    link.download = `${this.selectedFile()?.name.replace(/\.[^.]+$/, "") || "bild"}-emoji.png`;
+    link.download = `${this.selectedFile()?.name.replace(/\.[^.]+$/, "") || "image"}-emoji.png`;
     link.click();
   }
 
