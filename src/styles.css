@@ -4,6 +4,58 @@
   box-sizing: border-box;
 }
 
+:root[data-theme] {
+  --tui-background-base: var(--ground);
+  --tui-background-base-alt: var(--panel);
+  --tui-background-neutral-1: color-mix(in srgb, var(--ink) 6%, transparent);
+  --tui-background-neutral-1-hover: color-mix(in srgb, var(--ink) 10%, transparent);
+  --tui-background-neutral-1-pressed: color-mix(in srgb, var(--ink) 14%, transparent);
+  --tui-background-neutral-2: color-mix(in srgb, var(--ink) 16%, transparent);
+  --tui-background-neutral-2-hover: color-mix(in srgb, var(--ink) 22%, transparent);
+  --tui-background-neutral-2-pressed: color-mix(in srgb, var(--ink) 28%, transparent);
+  --tui-background-accent-1: var(--accent);
+  --tui-background-accent-1-hover: var(--accent-hover);
+  --tui-background-accent-1-pressed: var(--accent-line);
+  --tui-background-accent-2: var(--accent-soft);
+  --tui-background-accent-2-hover: var(--accent-soft);
+  --tui-background-accent-2-pressed: var(--accent-line);
+  --tui-background-accent-opposite: var(--ink);
+  --tui-background-accent-opposite-hover: var(--ink-muted);
+  --tui-background-accent-opposite-pressed: var(--line-strong);
+  --tui-background-elevation-1: var(--panel);
+  --tui-background-elevation-2: var(--panel-raised);
+  --tui-background-elevation-3: var(--panel-raised);
+  --tui-service-autofill-background: var(--accent-soft);
+  --tui-service-selection-background: color-mix(in srgb, var(--info) 12%, transparent);
+  --tui-border-normal: var(--line);
+  --tui-border-hover: var(--line-strong);
+  --tui-border-focus: var(--focus);
+  --tui-status-negative: var(--danger);
+  --tui-status-negative-pale: color-mix(in srgb, var(--danger) 14%, transparent);
+  --tui-status-negative-pale-hover: color-mix(in srgb, var(--danger) 22%, transparent);
+  --tui-status-positive: var(--success);
+  --tui-status-positive-pale: color-mix(in srgb, var(--success) 16%, transparent);
+  --tui-status-positive-pale-hover: color-mix(in srgb, var(--success) 24%, transparent);
+  --tui-status-warning: var(--accent);
+  --tui-status-warning-pale: color-mix(in srgb, var(--accent) 16%, transparent);
+  --tui-status-warning-pale-hover: color-mix(in srgb, var(--accent) 24%, transparent);
+  --tui-status-info: var(--info);
+  --tui-status-info-pale: color-mix(in srgb, var(--info) 16%, transparent);
+  --tui-status-info-pale-hover: color-mix(in srgb, var(--info) 24%, transparent);
+  --tui-status-neutral: var(--ink-muted);
+  --tui-text-primary: var(--ink);
+  --tui-text-secondary: var(--ink-muted);
+  --tui-text-tertiary: color-mix(in srgb, var(--ink-muted) 82%, transparent);
+  --tui-text-action: var(--accent-text);
+  --tui-text-action-hover: var(--accent-hover);
+  --tui-text-primary-on-accent-1: var(--on-accent);
+  --tui-text-primary-on-accent-2: var(--ink);
+  --tui-text-positive: var(--success);
+  --tui-text-positive-hover: var(--success);
+  --tui-text-negative: var(--danger);
+  --tui-text-negative-hover: var(--danger);
+}
+
 body {
   margin: 0;
   background: var(--ground);

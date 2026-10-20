@@ -5,9 +5,14 @@
     <a class="brand" routerLink="/">Emojify</a>
 
     <a routerLink="/analysis">Analysis</a>
-
-    <button crButton variant="ghost" type="button" (click)="theme.toggle()">
-      {{ theme.theme() === "dark" ? "Hell" : "Dunkel" }}
+<tui-icon icon="@tui-sun"></tui-icon>
+    <button tuiButton size="s" type="button" (click)="theme.toggle()">
+      @if (theme.theme() === "dark") {
+        <tui-icon icon="@tui-moon"></tui-icon>
+      } @else {
+        <tui-icon icon="@tui-sun"></tui-icon>
+      }
+      {{ theme.theme() === "dark" ? "Light" : "Dark" }}
     </button>
   </div>
 </header>

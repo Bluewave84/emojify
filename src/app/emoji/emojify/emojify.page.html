@@ -1,147 +1,167 @@
-<h1 class="page-title">Emoji-Mosaik</h1>
-<p class="page-lead">Wähle ein Bild und eine Emoji-Größe, dann entsteht daraus ein Mosaik.</p>
+<h1 class="page-title">Emoji Mosaic</h1>
 
 <div class="layout">
-  <aside class="controls" aria-label="Einstellungen">
-    <cr-card heading="Bild">
-      <span crChip crCardMeta>{{ selectedFile() ? "Ausgewählt" : "Kein Bild" }}</span>
+  <aside class="controls" aria-label="Settings">
+    <section class="control-section" aria-labelledby="image-heading">
+      <div class="control-heading">
+        <h2 id="image-heading">Image</h2>
+        @if (selectedFile()) {
+          <span class="control-value">Selected</span>
+        }
+      </div>
       <app-image-picker (fileSelected)="selectFile($event)" />
       @if (selectedFile(); as file) {
         <p class="file-name">{{ file.name }}</p>
       }
-    </cr-card>
+    </section>
 
-    <cr-card heading="Emoji-Größe">
-      <span crCardMeta class="cr-card__meta">{{ emojiSize() }} px</span>
+    <section class="control-section" aria-labelledby="size-heading">
+      <div class="control-heading">
+        <h2 id="size-heading">Emoji Size</h2>
+        <span class="control-value">{{ emojiSize() }} px</span>
+      </div>
       <app-emoji-size-select [size]="emojiSize()" (sizeChange)="changeSize($event)" />
-      <p class="hint">Kleinere Emojis ergeben mehr Details, größere ein gröberes Raster.</p>
-    </cr-card>
+    </section>
 
-    <cr-card heading="Hintergrund">
+    <section class="control-section" aria-labelledby="background-heading">
+      <h2 id="background-heading">Background</h2>
       <label class="background-toggle">
         <input
+          tuiCheckbox
           type="checkbox"
-          [checked]="transparentBackground()"
-          (change)="changeTransparentBackground($event)"
+          [ngModel]="transparentBackground()"
+          (ngModelChange)="changeTransparentBackground($event)"
         />
-        <span>Transparenter Hintergrund</span>
+        <span>Transparent background</span>
       </label>
       @if (!transparentBackground()) {
         <label class="background-color">
-          <span>Hintergrundfarbe</span>
-          <input
-            type="color"
-            [value]="backgroundColor()"
-            (input)="changeBackgroundColor($event)"
-          />
+          <span>Background color</span>
+          <input type="color" [value]="backgroundColor()" (input)="changeBackgroundColor($event)" />
         </label>
       }
-    </cr-card>
+    </section>
 
-    <cr-card heading="Emoji-Auswahl">
-      <fieldset class="cr-seg">
-        <legend class="visually-hidden">Emoji-Auswahl</legend>
+    <section class="control-section" aria-labelledby="selection-heading">
+      <h2 id="selection-heading">Emoji Selection</h2>
+      <div class="selection-modes" role="radiogroup" aria-labelledby="selection-heading">
         @for (mode of selectionModes; track mode.value) {
-          <label class="cr-seg__option">
+          <label class="selection-mode">
             <input
+              tuiRadio
               type="radio"
               name="emoji-selection"
               [value]="mode.value"
-              [checked]="mode.value === selection().mode"
-              (change)="changeSelectionMode(mode.value)"
+              [ngModel]="selection().mode"
+              (ngModelChange)="changeSelectionMode($event)"
             />
-            <span class="cr-seg__label">{{ mode.label }}</span>
-            <span class="cr-seg__meta">{{ mode.meta }}</span>
+            <span>{{ mode.label }}</span>
           </label>
         }
-      </fieldset>
-      @if (selection().mode !== "best") {
-        <label class="adjust">
-          <span>Top N: {{ selection().topN }} nächste Emojis</span>
-          <input
-            type="range"
-            min="2"
-            max="20"
-            step="1"
-            [value]="selection().topN"
-            (input)="changeTopN($event)"
-          />
-        </label>
-      }
-      <p class="hint">
-        Zufall und Reihum wählen aus den N farblich ähnlichsten Emojis und sorgen für mehr
-        Abwechslung.
-      </p>
-    </cr-card>
+      </div>
+    </section>
 
-    <cr-card heading="Bildanpassung">
-      @for (field of adjustmentFields; track field.key) {
-        <label class="adjust">
-          <span>{{ field.label }}: {{ adjustments()[field.key] }} %</span>
-          <input
-            type="range"
-            min="0"
-            max="200"
-            step="5"
-            [value]="adjustments()[field.key]"
+    <tui-accordion>
+      <button tuiAccordion type="button">More Settings</button>
+      <tui-expand>
+        <div class="advanced-controls">
+          @if (selection().mode !== "best") {
+            <label class="adjust">
+              <span>Top N: {{ selection().topN }}</span>
+              <input
+                tuiSlider
+                type="range"
+                min="2"
+                max="20"
+                step="1"
+                [ngModel]="selection().topN"
+                (ngModelChange)="changeTopN($event)"
+              />
+            </label>
+          }
+          @for (field of adjustmentFields; track field.key) {
+            <label class="adjust">
+              <span>{{ field.label }}: {{ adjustments()[field.key] }} %</span>
+              <input
+                tuiSlider
+                type="range"
+                min="0"
+                max="200"
+                step="5"
+                [ngModel]="adjustments()[field.key]"
+                [disabled]="!imageSource()"
+                (ngModelChange)="changeAdjustment(field.key, $event)"
+              />
+            </label>
+          }
+          <button
+            tuiButton
+            appearance="flat"
+            type="button"
             [disabled]="!imageSource()"
-            (input)="changeAdjustment(field.key, $event)"
-          />
-        </label>
-      }
-      <button
-        crButton
-        variant="ghost"
-        type="button"
-        [disabled]="!imageSource()"
-        (click)="resetAdjustments()"
-      >
-        Anpassungen zurücksetzen
-      </button>
-    </cr-card>
+            (click)="resetAdjustments()"
+          >
+            Reset adjustments
+          </button>
+        </div>
+      </tui-expand>
+    </tui-accordion>
 
     <div class="actions">
-      <button crButton variant="primary" type="button" [disabled]="!canCreate()" (click)="create()">
-        {{ busy() ? "Wird erstellt…" : "Mosaik erstellen" }}
+      <button
+        tuiButton
+        appearance="primary"
+        type="button"
+        [attr.aria-busy]="busy()"
+        [disabled]="!canCreate()"
+        (click)="create()"
+      >
+        {{ busy() ? "Creating…" : "Create mosaic" }}
       </button>
-      <button crButton variant="ghost" type="button" [disabled]="!selectedFile()" (click)="reset()">
-        Zurücksetzen
+      <button
+        tuiButton
+        appearance="flat"
+        type="button"
+        [disabled]="!selectedFile()"
+        (click)="reset()"
+      >
+        Reset
       </button>
     </div>
     @if (error() || dataError(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     } @else if (!dataReady()) {
-      <p class="hint" role="status">Emoji-Farbdaten werden geladen…</p>
+      <p class="hint" role="status">Loading emoji color data…</p>
     }
   </aside>
 
-  <section class="results" aria-label="Vorschau" [attr.aria-busy]="busy()">
+  <section class="results" aria-label="Preview" [attr.aria-busy]="busy()">
     <cr-card heading="Original">
       @if (imageSource(); as source) {
-        <img class="preview" [src]="source" [style.filter]="previewFilter()" alt="Originalbild" />
+        <img class="preview" [src]="source" [style.filter]="previewFilter()" alt="Original image" />
       } @else {
-        <app-image-stage placeholder="Kein Bild ausgewählt" />
+        <app-image-stage placeholder="No image selected" />
       }
     </cr-card>
 
-    <cr-card heading="Mosaik">
-      <span crChip crCardMeta>{{ mosaicSource() ? "Fertig" : busy() ? "In Arbeit" : "Leer" }}</span>
+    <cr-card heading="Mosaic">
+      <span crCardMeta>{{ mosaicSource() ? "Ready" : busy() ? "In progress" : "Empty" }}</span>
       @if (mosaicSource(); as source) {
-        <img class="preview" [src]="source" alt="Emoji-Mosaik" />
+        <img class="preview" [src]="source" alt="Emoji mosaic" />
       } @else {
         <app-image-stage
-          [placeholder]="busy() ? 'Mosaik wird erstellt…' : 'Hier erscheint dein Mosaik'"
+          [placeholder]="busy() ? 'Creating mosaic…' : 'Your mosaic will appear here'"
         />
       }
       <div class="result-actions">
         <button
-          crButton
-          variant="secondary"
+          tuiButton
+          appearance="secondary"
           type="button"
           [disabled]="!mosaicSource()"
           (click)="download()"
         >
-          Herunterladen
+          Download
         </button>
       </div>
     </cr-card>

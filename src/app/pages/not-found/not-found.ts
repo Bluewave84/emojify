@@ -24,4 +24,4 @@ import { CrButton } from "../../ui";
     }
   `,
 })
-export class NichtGefunden {}
+export class NotFound {}
