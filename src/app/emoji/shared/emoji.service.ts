@@ -39,7 +39,7 @@ export class EmojiService {
 
   private readonly kdTree = toSignal(
     inject(HttpClient)
-      .get("/emojiKdTree.bin", { responseType: "arraybuffer" })
+      .get("emojiKdTree.bin", { responseType: "arraybuffer" })
       .pipe(
         map((buffer) => {
           if (buffer.byteLength === 0 || buffer.byteLength % (6 * Float64Array.BYTES_PER_ELEMENT)) {

@@ -204,7 +204,7 @@ export class Emojify {
         }),
         firstValueFrom(
           this.http
-            .get("/emoji-sprite.svg", { responseType: "text" })
+            .get("emoji-sprite.svg", { responseType: "text" })
             .pipe(takeUntil(fromEvent(controller.signal, "abort"))),
         ),
       ]);
