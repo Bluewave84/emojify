@@ -354,3 +354,8 @@
     transition: none;
   }
 }
+
+/* Let cards stretch to equal height inside grids. */
+cr-card > .cr-card {
+  height: 100%;
+}

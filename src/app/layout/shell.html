@@ -1,22 +1,33 @@
-<a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+<a class="skip-link" href="#content">Skip to content</a>
 
 <header class="bar">
   <div class="bar__inner">
-    <a class="brand" routerLink="/">Emojify</a>
+    <a class="brand" routerLink="/" aria-label="Emojify home">
+      <span class="brand__mark" aria-hidden="true">😀</span>
+      <span>Emojify</span>
+    </a>
 
-    <a routerLink="/analysis">Analysis</a>
-    <tui-icon icon="@tui-sun"></tui-icon>
-    <button tuiButton size="s" type="button" (click)="theme.toggle()">
-      @if (theme.theme() === "dark") {
-        <tui-icon icon="@tui-moon"></tui-icon>
-      } @else {
-        <tui-icon icon="@tui-sun"></tui-icon>
-      }
+    <button
+      tuiButton
+      appearance="flat"
+      size="s"
+      type="button"
+      class="theme-toggle"
+      [attr.aria-label]="
+        theme.theme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+      "
+      (click)="theme.toggle()"
+    >
+      <tui-icon [icon]="theme.theme() === 'dark' ? '@tui.sun' : '@tui.moon'" />
       {{ theme.theme() === "dark" ? "Light" : "Dark" }}
     </button>
   </div>
 </header>
 
-<main id="inhalt" class="main">
+<main id="content" class="main">
   <router-outlet />
 </main>
+
+<footer class="foot">
+  <span>Runs entirely in your browser — your images never leave your device.</span>
+</footer>

@@ -9,10 +9,10 @@ import {
   inject,
   signal,
 } from "@angular/core";
-import { TuiButton, TuiCheckbox, TuiExpand, TuiRadio, TuiSlider } from "@taiga-ui/core";
-import { TuiAccordion } from "@taiga-ui/kit";
+import { TuiButton, TuiExpand, TuiSlider } from "@taiga-ui/core";
+import { TuiAccordion, TuiSwitch } from "@taiga-ui/kit";
 import { firstValueFrom, fromEvent, takeUntil } from "rxjs";
-import { CrCard } from "../../ui";
+import { CrCard, CrChip } from "../../ui";
 import { EmojiSizeSelect } from "./ui/emoji-size-select";
 import { ImagePicker } from "./ui/image-picker";
 import { ImageStage } from "./ui/image-stage";
@@ -36,11 +36,11 @@ import {
     FormsModule,
     TuiAccordion,
     TuiButton,
-    TuiCheckbox,
     TuiExpand,
-    TuiRadio,
     TuiSlider,
+    TuiSwitch,
     CrCard,
+    CrChip,
     EmojiSizeSelect,
     ImagePicker,
     ImageStage,
@@ -77,9 +77,9 @@ export class Emojify {
   ] as const;
   readonly selection = signal<EmojiSelection>({ ...DEFAULT_SELECTION });
   readonly selectionModes = [
-    { value: "best", label: "Best", meta: "Top 1" },
-    { value: "random", label: "Random", meta: "Top N" },
-    { value: "roundRobin", label: "Round robin", meta: "Top N" },
+    { value: "best", label: "Best", meta: "Closest" },
+    { value: "random", label: "Random", meta: "Mixed" },
+    { value: "roundRobin", label: "Cycle", meta: "In turn" },
   ] as const;
   readonly imageSource = signal<string | null>(null);
   readonly mosaicSource = signal<string | null>(null);
@@ -230,7 +230,10 @@ export class Emojify {
         this.transparentBackground() ? null : this.backgroundColor(),
         grid,
       );
-      if (operation === this.operation) this.mosaicSource.set(result);
+      if (operation === this.operation) {
+        this.mosaicSource.set(result);
+        this.revealResults();
+      }
     } catch {
       if (operation === this.operation) {
         this.error.set(
@@ -241,6 +244,16 @@ export class Emojify {
       controller.abort();
       if (operation === this.operation) this.busy.set(false);
     }
+  }
+
+  /** On single-column layouts the result sits above the settings; bring it into view. */
+  private revealResults() {
+    const view = this.doc.defaultView;
+    if (!view?.matchMedia("(max-width: 900px)").matches) return;
+    const reduce = view.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.doc
+      .getElementById("results")
+      ?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
   }
 
   download() {

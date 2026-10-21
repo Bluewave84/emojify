@@ -1,11 +1,10 @@
 import { FormsModule } from "@angular/forms";
-import { ChangeDetectionStrategy, Component, model } from "@angular/core";
+import { Component, model } from "@angular/core";
 import { TuiSlider } from "@taiga-ui/core";
 
 @Component({
   selector: "app-emoji-size-select",
   imports: [FormsModule, TuiSlider],
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { style: "display: block" },
   template: `
     <div class="size-select">
@@ -18,11 +17,15 @@ import { TuiSlider } from "@taiga-ui/core";
         [segments]="3"
         [ngModel]="size()"
         (ngModelChange)="size.set($event)"
-        aria-label="Emoji-Größe"
+        aria-label="Emoji size"
+        [attr.aria-valuetext]="size() + ' pixels'"
       />
       <div class="size-ticks" aria-hidden="true">
-        @for (size of sizes; track size) {
-          <span>{{ size }} px</span>
+        @for (option of sizes; track option.value) {
+          <span [class.size-ticks__active]="option.value === size()">
+            <b>{{ option.value }}</b>
+            {{ option.label }}
+          </span>
         }
       </div>
     </div>
@@ -30,15 +33,24 @@ import { TuiSlider } from "@taiga-ui/core";
   styles: `
     .size-select {
       display: grid;
-      gap: 0.25rem;
+      gap: var(--space-2);
     }
 
     .size-ticks {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       color: var(--ink-muted);
-      font-size: var(--type-small-size);
-      line-height: var(--type-small-line);
+      font-size: 12px;
+      line-height: 16px;
+    }
+
+    .size-ticks span {
+      display: grid;
+    }
+
+    .size-ticks b {
+      font-family: var(--font-mono);
+      font-weight: 500;
     }
 
     .size-ticks span:nth-child(2),
@@ -49,9 +61,22 @@ import { TuiSlider } from "@taiga-ui/core";
     .size-ticks span:last-child {
       text-align: end;
     }
+
+    .size-ticks__active {
+      color: var(--ink);
+    }
+
+    .size-ticks__active b {
+      color: var(--accent-text);
+    }
   `,
 })
 export class EmojiSizeSelect {
   readonly size = model<number>(16);
-  protected readonly sizes = [16, 32, 48, 64] as const;
+  protected readonly sizes = [
+    { value: 16, label: "Fine" },
+    { value: 32, label: "Medium" },
+    { value: 48, label: "Bold" },
+    { value: 64, label: "Chunky" },
+  ] as const;
 }

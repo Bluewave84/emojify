@@ -1,13 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { RouterLink, RouterOutlet } from "@angular/router";
-import { CrButton, ThemeService } from "../ui";
+import { ThemeService } from "../ui";
 import { TuiButton } from "@taiga-ui/core/components/button";
 import { TuiIcon } from "@taiga-ui/core/components/icon";
 
 @Component({
   selector: "app-shell",
-  imports: [RouterOutlet, RouterLink, CrButton, TuiIcon, TuiButton],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterOutlet, RouterLink, TuiIcon, TuiButton],
   templateUrl: "./shell.html",
   styleUrl: "./shell.css",
 })
