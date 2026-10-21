@@ -1,217 +1,287 @@
-<h1 class="page-title">Emoji Mosaic</h1>
+<section class="hero">
+  <p class="hero__eyebrow">Image → Emoji</p>
+  <h1 class="hero__title">Turn any picture into an emoji mosaic</h1>
+  <p class="hero__lead">
+    Every tile is the emoji that best matches its color. Pick an image, tune the look, and download
+    the result as a PNG.
+  </p>
+</section>
 
 <div class="layout">
   <aside class="controls" aria-label="Settings">
-    <section class="control-section" aria-labelledby="image-heading">
-      <div class="control-heading">
-        <h2 id="image-heading">Image</h2>
-        @if (selectedFile()) {
-          <span class="control-value">Selected</span>
+    <div class="panel">
+      <section class="control-section" aria-labelledby="image-heading">
+        <div class="control-heading">
+          <h2 id="image-heading">Image</h2>
+          @if (selectedFile()) {
+            <span crChip tone="success">Loaded</span>
+          }
+        </div>
+        @if (imageSource(); as source) {
+          <div class="file">
+            <img class="file__thumb" [src]="source" alt="" width="48" height="48" />
+            <div class="file__text">
+              <span class="file__name">{{ selectedFile()?.name }}</span>
+              <span class="file__meta">Ready to convert</span>
+            </div>
+          </div>
         }
-      </div>
-      <app-image-picker (fileSelected)="selectFile($event)" />
-      @if (selectedFile(); as file) {
-        <p class="file-name">{{ file.name }}</p>
-      }
-    </section>
-
-    <section class="control-section" aria-labelledby="size-heading">
-      <div class="control-heading">
-        <h2 id="size-heading">Emoji Size</h2>
-        <span class="control-value">{{ emojiSize() }} px</span>
-      </div>
-      <app-emoji-size-select [size]="emojiSize()" (sizeChange)="changeSize($event)" />
-    </section>
-
-    <section class="control-section" aria-labelledby="background-heading">
-      <h2 id="background-heading">Background</h2>
-      <label class="background-toggle">
-        <input
-          tuiCheckbox
-          type="checkbox"
-          [ngModel]="transparentBackground()"
-          (ngModelChange)="changeTransparentBackground($event)"
+        <app-image-picker
+          [compact]="true"
+          [hasImage]="!!imageSource()"
+          (fileSelected)="selectFile($event)"
         />
-        <span>Transparent background</span>
-      </label>
-      @if (!transparentBackground()) {
-        <label class="background-color">
-          <span>Background color</span>
-          <input type="color" [value]="backgroundColor()" (input)="changeBackgroundColor($event)" />
-        </label>
-      }
-    </section>
+      </section>
 
-    <section class="control-section" aria-labelledby="scale-heading">
-      <div class="control-heading">
-        <h2 id="scale-heading">Scale</h2>
-        <span class="control-value">{{ scale() }} %</span>
-      </div>
-      <select
-        class="scale-select"
-        aria-labelledby="scale-heading"
-        [ngModel]="scale()"
-        (ngModelChange)="changeScale($event)"
-      >
-        @for (option of scaleOptions; track option) {
-          <option [ngValue]="option">{{ option }} %</option>
-        }
-      </select>
-    </section>
+      <section class="control-section" aria-labelledby="size-heading">
+        <div class="control-heading">
+          <h2 id="size-heading">Emoji size</h2>
+          <span class="control-value">{{ emojiSize() }} px</span>
+        </div>
+        <app-emoji-size-select [size]="emojiSize()" (sizeChange)="changeSize($event)" />
+        <p class="control-hint">Smaller emoji give finer detail, larger ones a bolder look.</p>
+      </section>
 
-    <section class="control-section" aria-labelledby="remove-bg-heading">
-      <h2 id="remove-bg-heading">Remove Background</h2>
-      <label class="background-toggle">
-        <input
-          tuiCheckbox
-          type="checkbox"
-          [ngModel]="removeBackground()"
-          (ngModelChange)="changeRemoveBackground($event)"
-        />
-        <span>Remove background</span>
-      </label>
-      @if (removeBackground()) {
-        <label class="background-color">
-          <span>Select color</span>
-          <input type="color" [value]="removeColor()" (input)="changeRemoveColor($event)" />
-        </label>
-        <label class="adjust">
-          <span>Tolerance: {{ tolerance() }} %</span>
-          <input
-            tuiSlider
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            [ngModel]="tolerance()"
-            (ngModelChange)="changeTolerance($event)"
-          />
-        </label>
-      }
-    </section>
-
-    <section class="control-section" aria-labelledby="selection-heading">
-      <h2 id="selection-heading">Emoji Selection</h2>
-      <div class="selection-modes" role="radiogroup" aria-labelledby="selection-heading">
-        @for (mode of selectionModes; track mode.value) {
-          <label class="selection-mode">
+      <section class="control-section" aria-labelledby="selection-heading">
+        <h2 id="selection-heading">Emoji selection</h2>
+        <div class="cr-seg" role="radiogroup" aria-labelledby="selection-heading">
+          @for (mode of selectionModes; track mode.value) {
+            <label class="cr-seg__option">
+              <input
+                type="radio"
+                name="emoji-selection"
+                [value]="mode.value"
+                [ngModel]="selection().mode"
+                (ngModelChange)="changeSelectionMode($event)"
+              />
+              <span class="cr-seg__label">{{ mode.label }}</span>
+              <span class="cr-seg__meta">{{ mode.meta }}</span>
+            </label>
+          }
+        </div>
+        @if (selection().mode !== "best") {
+          <label class="adjust">
+            <span class="adjust__row">
+              <span>Variety (top N)</span>
+              <span class="control-value">{{ selection().topN }}</span>
+            </span>
             <input
-              tuiRadio
-              type="radio"
-              name="emoji-selection"
-              [value]="mode.value"
-              [ngModel]="selection().mode"
-              (ngModelChange)="changeSelectionMode($event)"
+              tuiSlider
+              type="range"
+              min="2"
+              max="20"
+              step="1"
+              [ngModel]="selection().topN"
+              (ngModelChange)="changeTopN($event)"
             />
-            <span>{{ mode.label }}</span>
           </label>
         }
-      </div>
-    </section>
+      </section>
 
-    <tui-accordion>
-      <button tuiAccordion type="button">More Settings</button>
-      <tui-expand>
-        <div class="advanced-controls">
-          @if (selection().mode !== "best") {
-            <label class="adjust">
-              <span>Top N: {{ selection().topN }}</span>
-              <input
-                tuiSlider
-                type="range"
-                min="2"
-                max="20"
-                step="1"
-                [ngModel]="selection().topN"
-                (ngModelChange)="changeTopN($event)"
-              />
-            </label>
-          }
-          @for (field of adjustmentFields; track field.key) {
-            <label class="adjust">
-              <span>{{ field.label }}: {{ adjustments()[field.key] }} %</span>
-              <input
-                tuiSlider
-                type="range"
-                min="0"
-                max="200"
-                step="5"
-                [ngModel]="adjustments()[field.key]"
-                [disabled]="!imageSource()"
-                (ngModelChange)="changeAdjustment(field.key, $event)"
-              />
-            </label>
-          }
-          <button
-            tuiButton
-            appearance="flat"
-            type="button"
-            [disabled]="!imageSource()"
-            (click)="resetAdjustments()"
-          >
-            Reset adjustments
-          </button>
+      <section class="control-section" aria-labelledby="background-heading">
+        <h2 id="background-heading">Background</h2>
+        <label class="toggle">
+          <span>Transparent background</span>
+          <input
+            tuiSwitch
+            type="checkbox"
+            [ngModel]="transparentBackground()"
+            (ngModelChange)="changeTransparentBackground($event)"
+          />
+        </label>
+        @if (!transparentBackground()) {
+          <label class="toggle">
+            <span>Background color</span>
+            <input
+              class="swatch"
+              type="color"
+              [value]="backgroundColor()"
+              (input)="changeBackgroundColor($event)"
+            />
+          </label>
+        }
+      </section>
+
+      <section class="control-section" aria-labelledby="scale-heading">
+        <div class="control-heading">
+          <h2 id="scale-heading">Scale</h2>
+          <span class="control-value">{{ scale() }} %</span>
         </div>
-      </tui-expand>
-    </tui-accordion>
+        <select
+          class="scale-select"
+          aria-labelledby="scale-heading"
+          [ngModel]="scale()"
+          (ngModelChange)="changeScale($event)"
+        >
+          @for (option of scaleOptions; track option) {
+            <option [ngValue]="option">{{ option }} %</option>
+          }
+        </select>
+      </section>
+
+      <section class="control-section" aria-labelledby="remove-bg-heading">
+        <h2 id="remove-bg-heading">Remove background</h2>
+        <label class="toggle">
+          <span>Cut out a color</span>
+          <input
+            tuiSwitch
+            type="checkbox"
+            [ngModel]="removeBackground()"
+            (ngModelChange)="changeRemoveBackground($event)"
+          />
+        </label>
+        @if (removeBackground()) {
+          <label class="toggle">
+            <span>Color to remove</span>
+            <input
+              class="swatch"
+              type="color"
+              [value]="removeColor()"
+              (input)="changeRemoveColor($event)"
+            />
+          </label>
+          <label class="adjust">
+            <span class="adjust__row">
+              <span>Tolerance</span>
+              <span class="control-value">{{ tolerance() }} %</span>
+            </span>
+            <input
+              tuiSlider
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              [ngModel]="tolerance()"
+              (ngModelChange)="changeTolerance($event)"
+            />
+          </label>
+        }
+      </section>
+
+      <tui-accordion class="more">
+        <button tuiAccordion type="button">Image adjustments</button>
+        <tui-expand>
+          <div class="advanced-controls">
+            @for (field of adjustmentFields; track field.key) {
+              <label class="adjust">
+                <span class="adjust__row">
+                  <span>{{ field.label }}</span>
+                  <span class="control-value">{{ adjustments()[field.key] }} %</span>
+                </span>
+                <input
+                  tuiSlider
+                  type="range"
+                  min="0"
+                  max="200"
+                  step="5"
+                  [ngModel]="adjustments()[field.key]"
+                  [disabled]="!imageSource()"
+                  (ngModelChange)="changeAdjustment(field.key, $event)"
+                />
+              </label>
+            }
+            <button
+              tuiButton
+              appearance="flat"
+              size="s"
+              type="button"
+              [disabled]="!imageSource()"
+              (click)="resetAdjustments()"
+            >
+              Reset adjustments
+            </button>
+          </div>
+        </tui-expand>
+      </tui-accordion>
+    </div>
 
     <div class="actions">
-      <button
-        tuiButton
-        appearance="primary"
-        type="button"
-        [attr.aria-busy]="busy()"
-        [disabled]="!canCreate()"
-        (click)="create()"
-      >
-        {{ busy() ? "Creating…" : "Create mosaic" }}
-      </button>
-      <button
-        tuiButton
-        appearance="flat"
-        type="button"
-        [disabled]="!selectedFile()"
-        (click)="reset()"
-      >
-        Reset
-      </button>
-    </div>
-    @if (error() || dataError(); as message) {
-      <p class="error" role="alert">{{ message }}</p>
-    } @else if (!dataReady()) {
-      <p class="hint" role="status">Loading emoji color data…</p>
-    }
-  </aside>
-
-  <section class="results" aria-label="Preview" [attr.aria-busy]="busy()">
-    <cr-card heading="Original">
-      @if (imageSource(); as source) {
-        <img class="preview" [src]="source" [style.filter]="previewFilter()" alt="Original image" />
-      } @else {
-        <app-image-stage placeholder="No image selected" />
+      @if (error() || dataError(); as message) {
+        <p class="error" role="alert">{{ message }}</p>
+      } @else if (!dataReady()) {
+        <p class="hint" role="status">Loading emoji color data…</p>
+      } @else if (!imageSource()) {
+        <p class="hint">Choose an image to get started.</p>
       }
-    </cr-card>
-
-    <cr-card heading="Mosaic">
-      <span crCardMeta>{{ mosaicSource() ? "Ready" : busy() ? "In progress" : "Empty" }}</span>
-      @if (mosaicSource(); as source) {
-        <img class="preview" [src]="source" alt="Emoji mosaic" />
-      } @else {
-        <app-image-stage
-          [placeholder]="busy() ? 'Creating mosaic…' : 'Your mosaic will appear here'"
-        />
-      }
-      <div class="result-actions">
+      <div class="actions__row">
+        <button
+          tuiButton
+          appearance="primary"
+          size="l"
+          type="button"
+          class="actions__create"
+          [attr.aria-busy]="busy()"
+          [disabled]="!canCreate()"
+          (click)="create()"
+        >
+          {{ busy() ? "Creating…" : mosaicSource() ? "Recreate mosaic" : "Create mosaic" }}
+        </button>
         <button
           tuiButton
           appearance="secondary"
+          size="l"
           type="button"
-          [disabled]="!mosaicSource()"
-          (click)="download()"
+          [disabled]="!selectedFile()"
+          (click)="reset()"
         >
-          Download
+          Reset
         </button>
       </div>
-    </cr-card>
+    </div>
+  </aside>
+
+  <section id="results" class="results" aria-label="Preview" [attr.aria-busy]="busy()">
+    @if (!imageSource()) {
+      <app-image-picker class="results__drop" (fileSelected)="selectFile($event)" />
+    } @else {
+      <div class="compare">
+        <cr-card heading="Original">
+          <span crCardMeta class="cr-card__meta">Source</span>
+          <div class="frame">
+            <img
+              class="preview"
+              [src]="imageSource()"
+              [style.filter]="previewFilter()"
+              alt="Original image"
+            />
+          </div>
+        </cr-card>
+
+        <cr-card heading="Mosaic">
+          <span crCardMeta>
+            @if (busy()) {
+              <span crChip tone="info">Working</span>
+            } @else if (mosaicSource()) {
+              <span crChip tone="success">Ready</span>
+            } @else {
+              <span crChip>Not created</span>
+            }
+          </span>
+          <div class="frame" [class.frame--checker]="transparentBackground() && mosaicSource()">
+            @if (mosaicSource(); as source) {
+              <img class="preview" [src]="source" alt="Emoji mosaic" />
+            } @else if (busy()) {
+              <div class="stage-busy" role="status">
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Placing emoji…</span>
+              </div>
+            } @else {
+              <app-image-stage placeholder="Press “Create mosaic” to see the result" />
+            }
+          </div>
+          <div class="result-actions">
+            <button
+              tuiButton
+              appearance="primary"
+              type="button"
+              [disabled]="!mosaicSource()"
+              (click)="download()"
+            >
+              Download PNG
+            </button>
+          </div>
+        </cr-card>
+      </div>
+    }
   </section>
 </div>

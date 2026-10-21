@@ -2,6 +2,7 @@ import { provideHttpClient } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { signal } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
+import { provideTaiga } from "@taiga-ui/core";
 import { vi } from "vitest";
 import { EmojiService } from "../shared/emoji.service";
 import { Emojify } from "./emojify.page";
@@ -15,6 +16,12 @@ describe("Emojify workflow", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     dataReady = signal(true);
+    vi.stubGlobal("matchMedia", () => ({
+      matches: false,
+      media: "",
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }));
     vi.stubGlobal(
       "URL",
       class extends URL {
@@ -27,6 +34,7 @@ describe("Emojify workflow", () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideTaiga(),
         {
           provide: EmojiService,
           useValue: {

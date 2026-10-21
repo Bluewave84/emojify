@@ -13,7 +13,7 @@ export const routes: Routes = [
       },
       {
         path: "**",
-        title: "Nicht gefunden · Emojify",
+        title: "Page not found · Emojify",
         loadComponent: () => import("./pages/not-found/not-found").then((m) => m.NotFound),
       },
     ],
