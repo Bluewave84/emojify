@@ -45,16 +45,16 @@ lives in [`references/`](references).
 
 ## Reference files — read when
 
-| Read | When |
-|---|---|
-| [architecture.md](references/architecture.md) | starting anything — the library's shape and the DI-first mental model |
-| [capabilities.md](references/capabilities.md) | choosing what to reach for — need → the wrong reflex → the primitive |
-| [forms.md](references/forms.md) | building any form, input, validation, or submit flow |
-| [overlays.md](references/overlays.md) | dialogs, confirms, notifications / toasts, dropdowns, hints |
-| [styling.md](references/styling.md) | about to write CSS — the escalation ladder that usually removes the need |
-| [pitfalls.md](references/pitfalls.md) | before finishing — the anti-hallucination self-review |
-| [platform.md](references/platform.md) | event modifiers, custom controls, DI helpers, masking, Polymorpheus, platform tokens |
-| [facts.md](references/facts.md) | offline / no MCP — concrete symbols, stale-recall table (safety net) |
+| Read                                          | When                                                                                 |
+| --------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [architecture.md](references/architecture.md) | starting anything — the library's shape and the DI-first mental model                |
+| [capabilities.md](references/capabilities.md) | choosing what to reach for — need → the wrong reflex → the primitive                 |
+| [forms.md](references/forms.md)               | building any form, input, validation, or submit flow                                 |
+| [overlays.md](references/overlays.md)         | dialogs, confirms, notifications / toasts, dropdowns, hints                          |
+| [styling.md](references/styling.md)           | about to write CSS — the escalation ladder that usually removes the need             |
+| [pitfalls.md](references/pitfalls.md)         | before finishing — the anti-hallucination self-review                                |
+| [platform.md](references/platform.md)         | event modifiers, custom controls, DI helpers, masking, Polymorpheus, platform tokens |
+| [facts.md](references/facts.md)               | offline / no MCP — concrete symbols, stale-recall table (safety net)                 |
 
 ## Angular fundamentals (compose, don't re-teach)
 

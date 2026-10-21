@@ -9,10 +9,16 @@ published typings and `llms-full.txt`; confirm anything you extend from the live
 `provideTaiga()` installs the event plugins, so template bindings take modifiers directly:
 
 ```html
-<form (submit.prevent)="save()">            <!-- no $event.preventDefault() in the handler -->
-<button (click.stop)="toggle()">            <!-- stopPropagation -->
-<div (click.self)="close()">                <!-- only when the target is this element -->
-<div (scroll.zoneless)="track($event)">     <!-- skip change detection on hot events -->
+<form (submit.prevent)="save()">
+  <!-- no $event.preventDefault() in the handler -->
+  <button (click.stop)="toggle()">
+    <!-- stopPropagation -->
+    <div (click.self)="close()">
+      <!-- only when the target is this element -->
+      <div (scroll.zoneless)="track($event)"><!-- skip change detection on hot events --></div>
+    </div>
+  </button>
+</form>
 ```
 
 `.capture` and `.once` work the same way. Writing `$event.preventDefault()` or

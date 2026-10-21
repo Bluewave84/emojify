@@ -21,7 +21,7 @@ data (label, buttons) and act on the boolean result it resolves to.
 
 ## Notifications / toasts
 
-Open through the injected **notification service**. Do **not** inject the abstract base *alert* service —
+Open through the injected **notification service**. Do **not** inject the abstract base _alert_ service —
 it type-checks but is not provided, so the app is a blank page at runtime. For a blocking / loading
 notification held open across an async action, use the dedicated loading-notification service and close it
 in `finally`.

@@ -17,7 +17,7 @@ Taiga form controls are **ControlValueAccessor directives**. Drive them through 
 `[formControl]` / `formControlName` / `[(ngModel)]`. **Do not** use the native `[checked]` / `[value]` to
 reflect state: without a bound `NgControl` the value never flows through the form — the control renders
 **display-only (decorative), not interactive**. This is the single most common "the control shows but I can't interact with it"
-bug, and it *compiles cleanly* — only the running app reveals it.
+bug, and it _compiles cleanly_ — only the running app reveals it.
 
 ```html
 <!-- right: bound through a form control -->

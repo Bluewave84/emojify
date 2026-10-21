@@ -7,16 +7,16 @@ reachable; otherwise confirm against the MCP / `llms-full.txt`.
 
 > **Installing / wiring Taiga is not this skill's job** — it belongs to the [`taiga-ui-setup`](../../taiga-ui-setup/SKILL.md)
 > skill (`ng add taiga-ui`, `provideTaiga()`, styles, `<tui-root>`, icons). The symbols below are listed
-> so you can *recognise* correct wiring while building, not so you add it by hand.
+> so you can _recognise_ correct wiring while building, not so you add it by hand.
 
 ### The mistakes this file exists to stop
 
 - Importing a symbol from the wrong package (see boundaries below) — the #1 build error, and a wrong guess looks plausible.
-- `TuiAlertService` for notifications — it *compiles*, then throws `NullInjectorError` (blank page). Use `TuiNotificationService`.
+- `TuiAlertService` for notifications — it _compiles_, then throws `NullInjectorError` (blank page). Use `TuiNotificationService`.
 - `<input tuiTextfield>` as the text control, a `tuiFieldError` pipe, or a `*_DATA` dialog token — removed / never existed.
 - `TuiSlider` from `@taiga-ui/kit` — it lives in **core** (kit only has the composite `TuiInputSlider`); wrong-package build error.
 - Native `[checked]` / `[value]` on a CVA control — value never binds to the form; renders display-only, not interactive.
-- `appearance="destructive"` (or `danger` / `error`) — no such value; `appearance` accepts any `string`, so it *compiles* and renders **unstyled** (silent, no build error). Use a compound `*-destructive` or status `negative`.
+- `appearance="destructive"` (or `danger` / `error`) — no such value; `appearance` accepts any `string`, so it _compiles_ and renders **unstyled** (silent, no build error). Use a compound `*-destructive` or status `negative`.
 - Legacy setup (`NG_EVENT_PLUGINS` / `provideAnimations()`) instead of `provideTaiga()`.
 
 ## Stale recall — what training data still believes
@@ -24,20 +24,20 @@ reachable; otherwise confirm against the MCP / `llms-full.txt`.
 Every row was checked against `llms-full.txt` and the published typings. The left column is wrong today;
 writing it costs a build error, a runtime throw, or silently unstyled markup.
 
-| If you remember… | Current reality |
-|---|---|
-| `TuiAlertService`, `[tuiAlert]` | `TuiNotificationService` (kit also ships a compact `TuiToastService`) |
-| `tuiFieldError` pipe, `[error]="[] \| tuiFieldError \| async"` | gone — bare `<tui-error formControlName="x" />` + `tuiValidationErrorsProvider`; the pipe that does exist is `TuiErrorPipe` (`\| tuiError`) |
-| `<tui-input>`, `<tui-input-password>` wrappers | `<tui-textfield>` + `<input tuiInput>`. **But** composite elements are real: `tui-input-chip`, `tui-input-inline`, `tui-input-range`, `tui-input-card-group` |
-| inner directive `tuiTextfield` on the input | renamed `tuiInput`; `tuiTextfield*` now names the wrapper's options |
-| `<tui-tag>` | `tuiChip` |
-| badge as an element | `<span tuiBadge>` — the elements `tui-badge-notification` and `tui-badged-content` are different components |
-| avatar as an element | the `[tuiAvatar]` attribute; `tui-avatar-stack` / `tui-avatar-labeled` are the composites |
-| `[showLoader]` on a button | `[loading]`, which needs `TuiButtonLoading` (kit) imported next to `TuiButton` |
-| `TUI_IS_MOBILE` | `WA_IS_MOBILE` (`@ng-web-apis/platform`) |
-| `tuiPure`, `TuiLet` | gone — `computed()` / a pipe, and `@let` in the template |
-| `TuiCell` from layout; Checkbox / Radio / Slider from kit | all in **core** |
-| `provideAnimations()` + a manual event-plugin provider | one `provideTaiga()` |
+| If you remember…                                               | Current reality                                                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `TuiAlertService`, `[tuiAlert]`                                | `TuiNotificationService` (kit also ships a compact `TuiToastService`)                                                                                        |
+| `tuiFieldError` pipe, `[error]="[] \| tuiFieldError \| async"` | gone — bare `<tui-error formControlName="x" />` + `tuiValidationErrorsProvider`; the pipe that does exist is `TuiErrorPipe` (`\| tuiError`)                  |
+| `<tui-input>`, `<tui-input-password>` wrappers                 | `<tui-textfield>` + `<input tuiInput>`. **But** composite elements are real: `tui-input-chip`, `tui-input-inline`, `tui-input-range`, `tui-input-card-group` |
+| inner directive `tuiTextfield` on the input                    | renamed `tuiInput`; `tuiTextfield*` now names the wrapper's options                                                                                          |
+| `<tui-tag>`                                                    | `tuiChip`                                                                                                                                                    |
+| badge as an element                                            | `<span tuiBadge>` — the elements `tui-badge-notification` and `tui-badged-content` are different components                                                  |
+| avatar as an element                                           | the `[tuiAvatar]` attribute; `tui-avatar-stack` / `tui-avatar-labeled` are the composites                                                                    |
+| `[showLoader]` on a button                                     | `[loading]`, which needs `TuiButtonLoading` (kit) imported next to `TuiButton`                                                                               |
+| `TUI_IS_MOBILE`                                                | `WA_IS_MOBILE` (`@ng-web-apis/platform`)                                                                                                                     |
+| `tuiPure`, `TuiLet`                                            | gone — `computed()` / a pipe, and `@let` in the template                                                                                                     |
+| `TuiCell` from layout; Checkbox / Radio / Slider from kit      | all in **core**                                                                                                                                              |
+| `provideAnimations()` + a manual event-plugin provider         | one `provideTaiga()`                                                                                                                                         |
 
 ## Setup symbols (wired by `taiga-ui-setup` — for recognition)
 
@@ -54,7 +54,7 @@ If any of these is missing and portalled UI won't render, run the `taiga-ui-setu
 ## Package boundaries (easy to get backwards)
 
 > These package assignments are current — **trust them over your own recollection.** Importing a
-> symbol from the wrong package is the #1 build error, and a wrong guess will still *look* plausible.
+> symbol from the wrong package is the #1 build error, and a wrong guess will still _look_ plausible.
 
 - **core:** `TuiButton`, `TuiIcon`, `TuiLink`, `TuiError`, `TuiTextfield` (the `<tui-textfield>` wrapper),
   `TuiInput`, `TuiLabel`, `TuiCheckbox`, `TuiRadio`, `TuiDataList`, `TuiDialogService`, `TuiNotificationService`,
@@ -89,7 +89,7 @@ If any of these is missing and portalled UI won't render, run the `taiga-ui-setu
   `TS2322: Type 'string' is not assignable to type 'boolean'`. (`tuiSelect` blocks typing on its own — you
   usually need no `readonly` at all.)
 - **Every `tui*` directive used in a template must appear in the component's `imports`.** A missing import on
-  a *bound* directive is a build error (`NG8002` / `NG8116`), but on a **bare attribute** (`tuiInput`,
+  a _bound_ directive is a build error (`NG8002` / `NG8116`), but on a **bare attribute** (`tuiInput`,
   `tuiSelect` with no `[…]`) it is **silent** — the element renders as a plain, unstyled native control and
   the build stays green. Grep every `tui*` attribute in the template against the `imports` array before
   claiming done; only the running app reveals the silent miss.
@@ -113,7 +113,7 @@ missing-provider error that `strictTemplates` cannot see. Same family as the bar
 ## Dialogs, confirms, notifications
 
 - Notifications: **`TuiNotificationService`** (core). `TuiAlertService` is an abstract base and is **not provided** —
-  injecting it throws `NullInjectorError` at runtime (it *compiles*, then the app is a blank page). Use
+  injecting it throws `NullInjectorError` at runtime (it _compiles_, then the app is a blank page). Use
   `TuiNotificationService`. For a blocking / loading toast held across an async action, use
   `TuiNotificationMiddleService` (kit) and close it in `finally`.
 - Dialogs: `TuiDialogService.open<Result>(new PolymorpheusComponent(Cmp), {data})`. Inside the dialog read input
@@ -143,18 +143,20 @@ private readonly notifications = inject(TuiNotificationService); // ✓ @taiga-u
 ```html
 <!-- Incorrect: wrong text control + a field-error pipe that no longer exists -->
 <input tuiTextfield [formControl]="email" />
-<tui-error [error]="email.errors | tuiFieldError | async" />   <!-- ✗ -->
+<tui-error [error]="email.errors | tuiFieldError | async" />
+<!-- ✗ -->
 <!-- Correct: tuiInput MUST sit inside <tui-textfield>; import both (core) -->
 <label tuiLabel>
   Email
   <tui-textfield><input tuiInput [formControl]="email" /></tui-textfield>
 </label>
-<tui-error formControlName="email" />                          <!-- ✓ messages via tuiValidationErrorsProvider (core) -->
+<tui-error formControlName="email" />
+<!-- ✓ messages via tuiValidationErrorsProvider (core) -->
 ```
 
 ```ts
 // Incorrect: inventing a Material-style data token
-const data = inject(TUI_DIALOG_DATA);                          // ✗ no such token
+const data = inject(TUI_DIALOG_DATA); // ✗ no such token
 // Correct: read context inside the dialog, return via completeWith
 const context = injectContext<TuiDialogContext<boolean, MyData>>(); // ✓ @taiga-ui/polymorpheus
 context.completeWith(true);

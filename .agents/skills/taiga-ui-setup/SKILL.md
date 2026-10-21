@@ -33,7 +33,7 @@ The schematic normally does all of this; check it and fix only what is missing.
   `@taiga-ui/core/styles/taiga-ui-fonts.less`
 - **Providers** — `provideTaiga()` is in the application providers:
   ```ts
-  import {provideTaiga} from '@taiga-ui/core';
+  import { provideTaiga } from "@taiga-ui/core";
   // ...
 
   bootstrapApplication(App, {
@@ -53,7 +53,6 @@ The schematic normally does all of this; check it and fix only what is missing.
 ```bash
 npx ng build
 ```
-
 
 ## 5. MCP (if the client is supported)
 

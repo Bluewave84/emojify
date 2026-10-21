@@ -1,6 +1,6 @@
 # Pitfalls: the anti-hallucination checklist (durable categories)
 
-Run through this before finishing any Taiga UI code. These are durable *classes* of error; the concrete
+Run through this before finishing any Taiga UI code. These are durable _classes_ of error; the concrete
 instances live in [facts.md](facts.md), but always prefer the live source.
 
 1. **Wrong package for a symbol.** The #1 compile error. Confirm every import against the import map
@@ -71,6 +71,8 @@ version-independent shapes.
 ```
 
 ```html
-<!-- Incorrect --> <div [ngClass]="{active: isActive}"></div>
-<!-- Correct   --> <div [class.active]="isActive"></div>
+<!-- Incorrect -->
+<div [ngClass]="{active: isActive}"></div>
+<!-- Correct   -->
+<div [class.active]="isActive"></div>
 ```
