@@ -2,6 +2,13 @@
 
 Pictures made of little expressions
 
+## Deploy to GitHub Pages
+
+The GitHub Actions workflow deploys the `main` branch to the project site at
+`https://bluewave84.github.io/emojify/`. In repository settings, open **Settings → Pages**
+and set **Build and deployment → Source** to **GitHub Actions**. After that one-time setup,
+each push to `main` deploys the app; the workflow can also be run manually.
+
 ## Emoji color tree
 
 `public/emojiKdTree.bin` maps colors to emojis. Rebuild it from a [noto-emoji](https://github.com/googlefonts/noto-emoji) checkout:

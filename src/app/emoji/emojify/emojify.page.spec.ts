@@ -98,7 +98,7 @@ describe("Emojify workflow", () => {
     const page = TestBed.createComponent(Emojify).componentInstance;
     page.selectFile(file);
     const creating = page.create();
-    const request = http.expectOne("/emoji-sprite.svg");
+    const request = http.expectOne("emoji-sprite.svg");
     page.reset();
     await creating;
     expect(request.cancelled).toBe(true);
@@ -110,7 +110,7 @@ describe("Emojify workflow", () => {
     const page = TestBed.createComponent(Emojify).componentInstance;
     page.selectFile(file);
     const creating = page.create();
-    http.expectOne("/emoji-sprite.svg").flush(null, { status: 404, statusText: "Not Found" });
+    http.expectOne("emoji-sprite.svg").flush(null, { status: 404, statusText: "Not Found" });
     await creating;
     expect(page.error()).toBeTruthy();
     expect(page.busy()).toBe(false);
