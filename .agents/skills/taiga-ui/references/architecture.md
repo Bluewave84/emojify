@@ -27,7 +27,7 @@ The mental model that stays true across majors. Confirm exact symbol names from 
 
 Symbols are split across packages (`core`, `kit`, `cdk`, `polymorpheus`, and addons) and **move between
 them across majors** — importing from the wrong package is the #1 build error, and a wrong guess still
-*looks* plausible. Confirm the owning package for every symbol against the live source before importing;
+_looks_ plausible. Confirm the owning package for every symbol against the live source before importing;
 offline, use the package boundaries in [facts.md](facts.md).
 
 ## Departures that catch people (durable)
