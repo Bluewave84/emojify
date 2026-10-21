@@ -13,6 +13,46 @@ export const DEFAULT_ADJUSTMENTS: ImageAdjustments = {
   saturation: 100,
 };
 
+export interface BackgroundRemoval {
+  color: string;
+  /** Percent (0-100) of the maximum RGB distance that still counts as background. */
+  tolerance: number;
+}
+
+export const SCALE_OPTIONS = [25, 50, 75, 100, 125, 150, 175, 200] as const;
+
+export interface AnalysisOptions {
+  adjustments?: ImageAdjustments;
+  /** Percent, 100 = original size. */
+  scale?: number;
+  removeBackground?: BackgroundRemoval | null;
+}
+
+const MAX_PIXELS = 16_000_000;
+const MAX_RGB_DISTANCE = Math.sqrt(3 * 255 * 255);
+
+export function parseHexColor(hex: string): [number, number, number] {
+  const match = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!match) throw new Error("Invalid color.");
+  const value = parseInt(match[1], 16);
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+/** Makes every pixel within the tolerance of the given color fully transparent. */
+export function removeBackgroundColor(
+  data: Uint8ClampedArray,
+  { color, tolerance }: BackgroundRemoval,
+): void {
+  const [tr, tg, tb] = parseHexColor(color);
+  const limit = (Math.min(100, Math.max(0, tolerance)) / 100) * MAX_RGB_DISTANCE;
+  for (let i = 0; i < data.length; i += 4) {
+    const dr = data[i] - tr;
+    const dg = data[i + 1] - tg;
+    const db = data[i + 2] - tb;
+    if (Math.sqrt(dr * dr + dg * dg + db * db) <= limit) data[i + 3] = 0;
+  }
+}
+
 const clamp = (value: number) => Math.min(255, Math.max(0, value));
 
 /** Applies brightness/contrast/saturation (percent, 100 = unchanged) like the CSS filters. */
@@ -63,14 +103,32 @@ export async function analyzeImageParts(
   imageSource: string,
   emojiSize: number,
   signal?: AbortSignal,
-  adjustments: ImageAdjustments = DEFAULT_ADJUSTMENTS,
+  options: AnalysisOptions = {},
 ): Promise<ImagePart[]> {
+  const { adjustments = DEFAULT_ADJUSTMENTS, scale = 100, removeBackground = null } = options;
   const image = await loadImage(doc, imageSource, signal);
   if (!Number.isInteger(emojiSize) || emojiSize <= 0) {
     throw new Error("Invalid emoji size.");
   }
-  if (image.naturalWidth * image.naturalHeight > 16_000_000) {
+  if (!Number.isFinite(scale) || scale <= 0) throw new Error("Invalid scale.");
+  if (image.naturalWidth * image.naturalHeight > MAX_PIXELS) {
     throw new Error("Das Bild darf maximal 16 Megapixel haben.");
+  }
+  const width = Math.max(1, Math.round((image.naturalWidth * scale) / 100));
+  const height = Math.max(1, Math.round((image.naturalHeight * scale) / 100));
+  if (width * height > MAX_PIXELS) {
+    throw new Error("Das skalierte Bild darf maximal 16 Megapixel haben.");
+  }
+  const source = doc.createElement("canvas");
+  source.width = width;
+  source.height = height;
+  const sourceContext = source.getContext("2d", { willReadFrequently: true });
+  if (!sourceContext) throw new Error("Failed to get 2D context.");
+  sourceContext.drawImage(image, 0, 0, width, height);
+  if (removeBackground) {
+    const pixels = sourceContext.getImageData(0, 0, width, height);
+    removeBackgroundColor(pixels.data, removeBackground);
+    sourceContext.putImageData(pixels, 0, 0);
   }
   const canvas = doc.createElement("canvas");
   const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -79,19 +137,48 @@ export async function analyzeImageParts(
   const parts: ImagePart[] = [];
 
   try {
-    const rows = Math.ceil(image.naturalHeight / emojiSize);
-    const cols = Math.ceil(image.naturalWidth / emojiSize);
+    const rows = Math.ceil(height / emojiSize);
+    const cols = Math.ceil(width / emojiSize);
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
         signal?.throwIfAborted();
         const sourceX = col * emojiSize;
         const sourceY = row * emojiSize;
-        canvas.width = Math.min(emojiSize, image.naturalWidth - sourceX);
-        canvas.height = Math.min(emojiSize, image.naturalHeight - sourceY);
+        canvas.width = Math.min(emojiSize, width - sourceX);
+        canvas.height = Math.min(emojiSize, height - sourceY);
+        if (removeBackground) {
+          const data = sourceContext.getImageData(
+            sourceX,
+            sourceY,
+            canvas.width,
+            canvas.height,
+          ).data;
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          let opaque = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            if (data[i + 3] < 128) continue;
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            opaque++;
+          }
+          if (opaque * 2 < data.length / 4) {
+            parts.push({ row, col, color: [0, 0, 0, 0] });
+          } else {
+            parts.push({
+              row,
+              col,
+              color: adjustColor([r / opaque, g / opaque, b / opaque, 255], adjustments),
+            });
+          }
+          continue;
+        }
         context.fillStyle = "#ffffff";
         context.fillRect(0, 0, canvas.width, canvas.height);
         context.drawImage(
-          image,
+          source,
           sourceX,
           sourceY,
           canvas.width,
@@ -113,6 +200,7 @@ export async function analyzeImageParts(
   } finally {
     averageColor.destroy();
     canvas.width = canvas.height = 0;
+    source.width = source.height = 0;
   }
 }
 
@@ -134,6 +222,7 @@ export async function createEmojiImage(
   spriteText: string,
   signal?: AbortSignal,
   backgroundColor: string | null = "#000000",
+  grid?: { rows: number; cols: number },
 ): Promise<string> {
   signal?.throwIfAborted();
   if (parts.length === 0) throw new Error("Cannot render an empty mosaic.");
@@ -147,6 +236,10 @@ export async function createEmojiImage(
   for (const part of parts) {
     rows = Math.max(rows, part.row + 1);
     cols = Math.max(cols, part.col + 1);
+  }
+  if (grid) {
+    rows = Math.max(rows, grid.rows);
+    cols = Math.max(cols, grid.cols);
   }
   canvas.width = cols * emojiSize;
   canvas.height = rows * emojiSize;

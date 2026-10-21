@@ -27,6 +27,7 @@ import {
   createEmojiImage,
   DEFAULT_ADJUSTMENTS,
   ImageAdjustments,
+  SCALE_OPTIONS,
 } from "./mosaic-renderer";
 
 @Component({
@@ -59,6 +60,11 @@ export class Emojify {
   readonly emojiSize = signal(16);
   readonly transparentBackground = signal(false);
   readonly backgroundColor = signal("#000000");
+  readonly scaleOptions = SCALE_OPTIONS;
+  readonly scale = signal(100);
+  readonly removeBackground = signal(false);
+  readonly removeColor = signal("#ffffff");
+  readonly tolerance = signal(10);
   readonly adjustments = signal<ImageAdjustments>({ ...DEFAULT_ADJUSTMENTS });
   readonly previewFilter = computed(() => {
     const a = this.adjustments();
@@ -139,6 +145,26 @@ export class Emojify {
     this.backgroundColor.set((event.target as HTMLInputElement).value);
   }
 
+  changeScale(scale: number) {
+    this.invalidateMosaic();
+    this.scale.set(Number(scale));
+  }
+
+  changeRemoveBackground(remove: boolean) {
+    this.invalidateMosaic();
+    this.removeBackground.set(remove);
+  }
+
+  changeRemoveColor(event: Event) {
+    this.invalidateMosaic();
+    this.removeColor.set((event.target as HTMLInputElement).value);
+  }
+
+  changeTolerance(tolerance: number) {
+    this.invalidateMosaic();
+    this.tolerance.set(Number(tolerance));
+  }
+
   private invalidateMosaic() {
     this.operation++;
     this.controller?.abort();
@@ -169,7 +195,13 @@ export class Emojify {
 
     try {
       const [parts, sprite] = await Promise.all([
-        analyzeImageParts(this.doc, source, size, controller.signal, this.adjustments()),
+        analyzeImageParts(this.doc, source, size, controller.signal, {
+          adjustments: this.adjustments(),
+          scale: this.scale(),
+          removeBackground: this.removeBackground()
+            ? { color: this.removeColor(), tolerance: this.tolerance() }
+            : null,
+        }),
         firstValueFrom(
           this.http
             .get("/emoji-sprite.svg", { responseType: "text" })
@@ -177,13 +209,26 @@ export class Emojify {
         ),
       ]);
       if (operation !== this.operation) return;
+      const visible = parts.filter((part) => part.color[3] > 0);
+      if (visible.length === 0) {
+        this.error.set("Nothing left to render: the background removal covers the whole image.");
+        return;
+      }
+      const grid = parts.reduce(
+        (g, part) => ({
+          rows: Math.max(g.rows, part.row + 1),
+          cols: Math.max(g.cols, part.col + 1),
+        }),
+        { rows: 0, cols: 0 },
+      );
       const result = await createEmojiImage(
         this.doc,
-        this.emojiService.emojify(parts, this.selection()),
+        this.emojiService.emojify(visible, this.selection()),
         size,
         sprite,
         controller.signal,
         this.transparentBackground() ? null : this.backgroundColor(),
+        grid,
       );
       if (operation === this.operation) this.mosaicSource.set(result);
     } catch {
@@ -213,6 +258,8 @@ export class Emojify {
     const source = this.imageSource();
     if (source) URL.revokeObjectURL(source);
     this.selectedFile.set(null);
+    this.scale.set(100);
+    this.removeBackground.set(false);
     this.adjustments.set({ ...DEFAULT_ADJUSTMENTS });
     this.imageSource.set(null);
     this.mosaicSource.set(null);

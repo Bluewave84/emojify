@@ -42,6 +42,54 @@
       }
     </section>
 
+    <section class="control-section" aria-labelledby="scale-heading">
+      <div class="control-heading">
+        <h2 id="scale-heading">Scale</h2>
+        <span class="control-value">{{ scale() }} %</span>
+      </div>
+      <select
+        class="scale-select"
+        aria-labelledby="scale-heading"
+        [ngModel]="scale()"
+        (ngModelChange)="changeScale($event)"
+      >
+        @for (option of scaleOptions; track option) {
+          <option [ngValue]="option">{{ option }} %</option>
+        }
+      </select>
+    </section>
+
+    <section class="control-section" aria-labelledby="remove-bg-heading">
+      <h2 id="remove-bg-heading">Remove Background</h2>
+      <label class="background-toggle">
+        <input
+          tuiCheckbox
+          type="checkbox"
+          [ngModel]="removeBackground()"
+          (ngModelChange)="changeRemoveBackground($event)"
+        />
+        <span>Remove background</span>
+      </label>
+      @if (removeBackground()) {
+        <label class="background-color">
+          <span>Select color</span>
+          <input type="color" [value]="removeColor()" (input)="changeRemoveColor($event)" />
+        </label>
+        <label class="adjust">
+          <span>Tolerance: {{ tolerance() }} %</span>
+          <input
+            tuiSlider
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            [ngModel]="tolerance()"
+            (ngModelChange)="changeTolerance($event)"
+          />
+        </label>
+      }
+    </section>
+
     <section class="control-section" aria-labelledby="selection-heading">
       <h2 id="selection-heading">Emoji Selection</h2>
       <div class="selection-modes" role="radiogroup" aria-labelledby="selection-heading">
