@@ -10,8 +10,11 @@ import {
   TuiTitle,
 } from "@taiga-ui/core";
 import { TuiAccordion, TuiBlock, TuiInputColor, TuiInputSlider, TuiSegmented } from "@taiga-ui/kit";
-import { EMOJI_CATEGORIES } from "../../shared/color-tree/emoji-categories";
-import { EmojiCategory, EmojiSelectionMode, EmojiVariant } from "../../shared/emoji.service";
+import {
+  EMOJI_CATEGORIES,
+  EmojiCategory,
+} from "../../shared/color-tree/emoji-categories";
+import { EmojiSelectionMode, EmojiVariant } from "../../shared/emoji.service";
 import { EmojifyStore, TILE_SIZES } from "../emojify.store";
 
 const BACKGROUND_PRESETS = [

@@ -14,12 +14,12 @@ import { firstValueFrom, fromEvent, takeUntil } from "rxjs";
 import {
   DEFAULT_SELECTION,
   EmojiPart,
-  EmojiCategory,
   EmojiSelection,
   EmojiSelectionMode,
   EmojiVariant,
   EmojiService,
 } from "../shared/emoji.service";
+import { EmojiCategory } from "../shared/color-tree/emoji-categories";
 import {
   analyzeImageParts,
   backgroundAlpha,
