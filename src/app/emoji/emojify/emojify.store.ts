@@ -14,8 +14,10 @@ import { firstValueFrom, fromEvent, takeUntil } from "rxjs";
 import {
   DEFAULT_SELECTION,
   EmojiPart,
+  EmojiCategory,
   EmojiSelection,
   EmojiSelectionMode,
+  EmojiVariant,
   EmojiService,
 } from "../shared/emoji.service";
 import {
@@ -195,6 +197,20 @@ export class EmojifyStore {
     this.selection.update((s) => ({ ...s, mode }));
   }
 
+  setEmojiVariant(variant: EmojiVariant) {
+    this.selection.update((s) => ({ ...s, variant }));
+  }
+
+  setEmojiCategory(category: EmojiCategory, selected: boolean) {
+    this.selection.update((selection) => {
+      const categories = selection.categories ?? DEFAULT_SELECTION.categories!;
+      const next = selected
+        ? [...new Set([...categories, category])]
+        : categories.filter((item) => item !== category);
+      return { ...selection, categories: next.length ? next : categories };
+    });
+  }
+
   setTopN(topN: number) {
     this.selection.update((s) => ({ ...s, topN }));
   }
@@ -258,6 +274,7 @@ export class EmojifyStore {
         signal,
         backgroundFill(request.background),
         analysis.grid,
+        request.selection.variant === "monochrome",
       );
       if (operation === this.operation) this.mosaic.set(result);
     } catch {

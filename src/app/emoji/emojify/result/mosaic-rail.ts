@@ -1,8 +1,17 @@
 import { Component, computed, inject } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { TuiExpand, TuiLabel, TuiRadio, TuiSlider, TuiTextfield, TuiTitle } from "@taiga-ui/core";
+import {
+  TuiCheckbox,
+  TuiExpand,
+  TuiLabel,
+  TuiRadio,
+  TuiSlider,
+  TuiTextfield,
+  TuiTitle,
+} from "@taiga-ui/core";
 import { TuiAccordion, TuiBlock, TuiInputColor, TuiInputSlider, TuiSegmented } from "@taiga-ui/kit";
-import { EmojiSelectionMode } from "../../shared/emoji.service";
+import { EMOJI_CATEGORIES } from "../../shared/color-tree/emoji-categories";
+import { EmojiCategory, EmojiSelectionMode, EmojiVariant } from "../../shared/emoji.service";
 import { EmojifyStore, TILE_SIZES } from "../emojify.store";
 
 const BACKGROUND_PRESETS = [
@@ -21,6 +30,7 @@ type Preset = (typeof BACKGROUND_PRESETS)[number]["value"];
     FormsModule,
     TuiAccordion,
     TuiBlock,
+    TuiCheckbox,
     TuiExpand,
     TuiInputColor,
     TuiInputSlider,
@@ -57,42 +67,77 @@ type Preset = (typeof BACKGROUND_PRESETS)[number]["value"];
 
       <button type="button" [tuiAccordion]="true">Emoji choice</button>
       <tui-expand>
-        <div class="rail__group" role="radiogroup" aria-label="Emoji choice">
-          @for (mode of modes; track mode.value) {
-            <label tuiBlock="s">
-              <input
-                tuiRadio
-                type="radio"
-                name="emoji-mode"
-                [value]="mode.value"
-                [ngModel]="store.selection().mode"
-                (ngModelChange)="setMode($event)"
-              />
-              <span tuiTitle>
-                {{ mode.label }}
-                <span tuiSubtitle>{{ mode.hint }}</span>
-              </span>
-            </label>
-          }
-          @if (store.selection().mode !== "best") {
-            <tui-textfield>
-              <label tuiLabel for="variety">Variety (top N)</label>
-              <input
-                id="variety"
-                tuiInputSlider
-                [min]="2"
-                [max]="20"
-                [ngModel]="store.selection().topN"
-                (ngModelChange)="store.setTopN($event)"
-              />
-              <input
-                tuiSlider
-                type="range"
-                step="1"
-                aria-label="Variety"
-                [attr.aria-valuetext]="store.selection().topN + ' closest emoji'"
-              />
-            </tui-textfield>
+        <div class="rail__group">
+          <div role="radiogroup" aria-label="Emoji style">
+            <tui-segmented size="s" class="rail__segmented">
+              @for (variant of variants; track variant.value) {
+                <label>
+                  <input
+                    type="radio"
+                    name="emoji-variant"
+                    [value]="variant.value"
+                    [ngModel]="store.selection().variant ?? 'color'"
+                    (ngModelChange)="setVariant($event)"
+                  />
+                  {{ variant.label }}
+                </label>
+              }
+            </tui-segmented>
+          </div>
+          @if (store.selection().variant === "monochrome") {
+            <div class="rail__group" role="group" aria-label="Emoji categories">
+              @for (category of categories; track category.id) {
+                <label class="rail__category">
+                  <input
+                    tuiCheckbox
+                    type="checkbox"
+                    [ngModel]="store.selection().categories?.includes(category.id) ?? true"
+                    (ngModelChange)="setCategory(category.id, $event)"
+                  />
+                  {{ category.label }}
+                </label>
+              }
+            </div>
+            <p class="rail__hint">Single-color emoji are rendered white. Choose a dark background for contrast.</p>
+          } @else {
+            <div class="rail__group" role="radiogroup" aria-label="Emoji choice">
+              @for (mode of modes; track mode.value) {
+                <label tuiBlock="s">
+                  <input
+                    tuiRadio
+                    type="radio"
+                    name="emoji-mode"
+                    [value]="mode.value"
+                    [ngModel]="store.selection().mode"
+                    (ngModelChange)="setMode($event)"
+                  />
+                  <span tuiTitle>
+                    {{ mode.label }}
+                    <span tuiSubtitle>{{ mode.hint }}</span>
+                  </span>
+                </label>
+              }
+              @if (store.selection().mode !== "best") {
+                <tui-textfield>
+                  <label tuiLabel for="variety">Variety (top N)</label>
+                  <input
+                    id="variety"
+                    tuiInputSlider
+                    [min]="2"
+                    [max]="20"
+                    [ngModel]="store.selection().topN"
+                    (ngModelChange)="store.setTopN($event)"
+                  />
+                  <input
+                    tuiSlider
+                    type="range"
+                    step="1"
+                    aria-label="Variety"
+                    [attr.aria-valuetext]="store.selection().topN + ' closest emoji'"
+                  />
+                </tui-textfield>
+              }
+            </div>
           }
         </div>
       </tui-expand>
@@ -153,6 +198,14 @@ type Preset = (typeof BACKGROUND_PRESETS)[number]["value"];
       inline-size: 100%;
     }
 
+    .rail__category {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-block-size: 36px;
+      cursor: pointer;
+    }
+
     .rail__hint {
       margin: 0;
       font-size: var(--type-small-size);
@@ -165,6 +218,11 @@ export class MosaicRail {
   protected readonly store = inject(EmojifyStore);
   protected readonly tileSizes = TILE_SIZES;
   protected readonly presets = BACKGROUND_PRESETS;
+  protected readonly categories = EMOJI_CATEGORIES;
+  protected readonly variants = [
+    { value: "color", label: "Color" },
+    { value: "monochrome", label: "Single color" },
+  ] as const;
   protected readonly modes = [
     { value: "best", label: "Best", hint: "The closest color for every tile" },
     { value: "random", label: "Random", hint: "Mixed from the closest emoji" },
@@ -181,6 +239,14 @@ export class MosaicRail {
 
   protected setMode(mode: EmojiSelectionMode) {
     this.store.setSelectionMode(mode);
+  }
+
+  protected setVariant(variant: EmojiVariant) {
+    this.store.setEmojiVariant(variant);
+  }
+
+  protected setCategory(category: EmojiCategory, selected: boolean) {
+    this.store.setEmojiCategory(category, selected);
   }
 
   protected setPreset(preset: Preset) {

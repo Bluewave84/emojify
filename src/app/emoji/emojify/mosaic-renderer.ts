@@ -223,6 +223,7 @@ export async function createEmojiImage(
   signal?: AbortSignal,
   backgroundColor: string | null = "#000000",
   grid?: { rows: number; cols: number },
+  monochrome = false,
 ): Promise<string> {
   signal?.throwIfAborted();
   if (parts.length === 0) throw new Error("Cannot render an empty mosaic.");
@@ -268,6 +269,7 @@ export async function createEmojiImage(
           URL.revokeObjectURL(source);
         }
       }
+      context.filter = monochrome ? "brightness(0) invert(1)" : "none";
       context.drawImage(image, part.col * emojiSize, part.row * emojiSize, emojiSize, emojiSize);
     }
     const result = canvas.toDataURL("image/png");
