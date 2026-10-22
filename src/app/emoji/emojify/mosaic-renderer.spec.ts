@@ -1,4 +1,10 @@
-import { analyzeImageParts, createEmojiImage, extractEmojiSvg } from "./mosaic-renderer";
+import {
+  analyzeImageParts,
+  backgroundAlpha,
+  backgroundFill,
+  createEmojiImage,
+  extractEmojiSvg,
+} from "./mosaic-renderer";
 
 describe("mosaic rendering", () => {
   const spriteText =
@@ -47,5 +53,15 @@ describe("mosaic rendering", () => {
         controller.signal,
       ),
     ).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("turns hexa background values into canvas fills", () => {
+    expect(backgroundFill("#00000000")).toBeNull();
+    expect(backgroundFill("#FFFFFFFF")).toBe("#ffffff");
+    expect(backgroundFill("#112233")).toBe("#112233");
+    expect(backgroundFill("#ff000080")).toBe("rgba(255, 0, 0, 0.502)");
+    expect(() => backgroundFill("red")).toThrow("Invalid color");
+    expect(backgroundAlpha("#ff000080")).toBe(128);
+    expect(backgroundAlpha("#ff0000")).toBe(255);
   });
 });

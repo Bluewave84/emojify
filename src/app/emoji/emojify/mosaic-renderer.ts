@@ -278,3 +278,72 @@ export async function createEmojiImage(
     canvas.width = canvas.height = 0;
   }
 }
+
+/**
+ * Turns an `#rrggbbaa` (or `#rrggbb`) value into a canvas fill. A fully transparent
+ * value yields `null`, which leaves the mosaic background transparent.
+ */
+export function backgroundFill(hexa: string): string | null {
+  const match = /^#?([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(hexa.trim());
+  if (!match) throw new Error("Invalid color.");
+  const alpha = match[2] === undefined ? 255 : parseInt(match[2], 16);
+  if (alpha === 0) return null;
+  if (alpha === 255) return `#${match[1].toLowerCase()}`;
+  const [r, g, b] = parseHexColor(match[1]);
+  return `rgba(${r}, ${g}, ${b}, ${Math.round((alpha / 255) * 1000) / 1000})`;
+}
+
+/** Alpha of an `#rrggbbaa` value as 0-255; `#rrggbb` counts as opaque. */
+export function backgroundAlpha(hexa: string): number {
+  const match = /^#?[0-9a-f]{6}([0-9a-f]{2})?$/i.exec(hexa.trim());
+  return match?.[1] === undefined ? 255 : parseInt(match[1], 16);
+}
+
+const toHex = (value: number) => value.toString(16).padStart(2, "0");
+
+/** Reads the color of one pixel, given as fractions (0-1) of the image width and height. */
+export async function sampleColor(
+  doc: Document,
+  imageSource: string,
+  x: number,
+  y: number,
+): Promise<string> {
+  const image = await loadImage(doc, imageSource);
+  const canvas = doc.createElement("canvas");
+  canvas.width = canvas.height = 1;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) throw new Error("Failed to get 2D context.");
+  const px = Math.min(image.naturalWidth - 1, Math.max(0, Math.floor(x * image.naturalWidth)));
+  const py = Math.min(image.naturalHeight - 1, Math.max(0, Math.floor(y * image.naturalHeight)));
+  context.drawImage(image, px, py, 1, 1, 0, 0, 1, 1);
+  const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+const PREVIEW_MAX_SIDE = 1200;
+
+/** Renders a downscaled preview of the image with the background color cut out. */
+export async function renderBackgroundPreview(
+  doc: Document,
+  imageSource: string,
+  removal: BackgroundRemoval,
+  signal?: AbortSignal,
+): Promise<string> {
+  const image = await loadImage(doc, imageSource, signal);
+  const ratio = Math.min(1, PREVIEW_MAX_SIDE / Math.max(image.naturalWidth, image.naturalHeight));
+  const canvas = doc.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * ratio));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * ratio));
+  try {
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) throw new Error("Failed to get 2D context.");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    signal?.throwIfAborted();
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+    removeBackgroundColor(pixels.data, removal);
+    context.putImageData(pixels, 0, 0);
+    return canvas.toDataURL("image/png");
+  } finally {
+    canvas.width = canvas.height = 0;
+  }
+}

@@ -7,9 +7,7 @@ export const routes: Routes = [
     children: [
       {
         path: "",
-        pathMatch: "full",
-        title: "Convert your image · Emojify",
-        loadComponent: () => import("./emoji/emojify/emojify.page").then((m) => m.Emojify),
+        loadChildren: () => import("./emoji/emojify/emojify.routes").then((m) => m.EMOJIFY_ROUTES),
       },
       {
         path: "**",
