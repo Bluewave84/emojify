@@ -1,7 +1,8 @@
 import { provideHttpClient } from "@angular/common/http";
 import { HttpTestingController, provideHttpClientTesting } from "@angular/common/http/testing";
 import { TestBed } from "@angular/core/testing";
-import { EMOJIS } from "./color-tree/emoji-list";
+import { EMOJI_LIST, EMOJIS } from "./color-tree/emoji-list";
+import { EMOJI_CATEGORIES, emojiCategoryAt } from "./color-tree/emoji-categories";
 import { EmojiService } from "./emoji.service";
 
 describe("EmojiService", () => {
@@ -73,6 +74,26 @@ describe("EmojiService", () => {
       const rolls = [0.99, 0, 0.5, 0.4];
       const result = service.emojify(tiles, { mode: "random", topN: 3 }, () => rolls.shift()!);
       expect(result.map((p) => p.emoji)).toEqual([EMOJIS[2], EMOJIS[0], EMOJIS[1], EMOJIS[1]]);
+    });
+
+    it("chooses monochrome emojis only from the selected categories", () => {
+      const category = EMOJI_CATEGORIES[7].id;
+      const firstMatchingId = Array.from({ length: EMOJI_LIST.length }, (_, index) => index).find(
+        (index) => emojiCategoryAt(index) === category,
+      )!;
+      const result = service.emojify(
+        tiles,
+        { mode: "best", topN: 5, variant: "monochrome", categories: [category] },
+        () => 0,
+      );
+
+      expect(result.map((part) => part.emoji)).toEqual(Array(tiles.length).fill(EMOJIS[firstMatchingId]));
+    });
+
+    it("rejects monochrome selection without categories", () => {
+      expect(() =>
+        service.emojify(tiles, { mode: "best", topN: 5, variant: "monochrome", categories: [] }),
+      ).toThrow("Select at least one emoji category.");
     });
   });
 });

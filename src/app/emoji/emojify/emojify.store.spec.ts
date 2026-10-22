@@ -81,7 +81,7 @@ describe("EmojifyStore", () => {
     store.resultActive.set(true);
     await settle();
     expect(analyzeImageParts).toHaveBeenCalledTimes(1);
-    expect(emojify).toHaveBeenCalledWith([parts[0]], { mode: "best", topN: 5 });
+    expect(emojify).toHaveBeenCalledWith([parts[0]], store.selection());
     expect(store.mosaic()).toBe("data:image/png;base64,mosaic");
     expect(store.busy()).toBe(false);
   });

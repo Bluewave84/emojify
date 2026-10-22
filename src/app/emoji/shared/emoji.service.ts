@@ -3,7 +3,8 @@ import { computed, inject, Service, signal } from "@angular/core";
 import { catchError, map, of } from "rxjs";
 import { OklabKDTree } from "./color-tree/oklab-kd-tree";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { EMOJIS } from "./color-tree/emoji-list";
+import { EMOJI_LIST, EMOJIS } from "./color-tree/emoji-list";
+import { EMOJI_CATEGORIES, EmojiCategory, emojiCategoryAt } from "./color-tree/emoji-categories";
 import { flattenAlphaOnWhite } from "./color-tree/utils";
 
 export interface ImagePart {
@@ -18,14 +19,22 @@ export interface EmojiPart {
 }
 
 export type EmojiSelectionMode = "best" | "random" | "roundRobin";
+export type EmojiVariant = "color" | "monochrome";
 
 export interface EmojiSelection {
   mode: EmojiSelectionMode;
   /** Number of closest emojis to choose from for "random" and "roundRobin". */
   topN: number;
+  variant?: EmojiVariant;
+  categories?: EmojiCategory[];
 }
 
-export const DEFAULT_SELECTION: EmojiSelection = { mode: "best", topN: 5 };
+export const DEFAULT_SELECTION: EmojiSelection = {
+  mode: "best",
+  topN: 5,
+  variant: "color",
+  categories: EMOJI_CATEGORIES.map(({ id }) => id),
+};
 
 export interface TreeBinary {
   rootIndex: number;
@@ -61,6 +70,20 @@ export class EmojiService {
     selection: EmojiSelection = DEFAULT_SELECTION,
     random: () => number = Math.random,
   ): EmojiPart[] {
+    if (selection.variant === "monochrome") {
+      const categories = new Set(selection.categories ?? EMOJI_CATEGORIES.map(({ id }) => id));
+      const candidates = EMOJI_LIST.flatMap((emoji, id) =>
+        categories.has(emojiCategoryAt(id)) ? [{ emoji, id }] : [],
+      );
+      if (candidates.length === 0) {
+        throw new Error("Select at least one emoji category.");
+      }
+      return imageParts.map((part) => {
+        const pick = Math.min(candidates.length - 1, Math.floor(random() * candidates.length));
+        return { row: part.row, col: part.col, emoji: candidates[pick].emoji };
+      });
+    }
+
     const tree = this.kdTree();
     if (!tree) {
       throw new Error("KD-Tree not loaded yet.");
